@@ -1,0 +1,72 @@
+Date   Who          Start  Stop    Interruptions  Question   TimeOnTask                 Comments
+11/19  ZKD          19:20  21:26       0	      1           121	          changes to q1
+
+============committing to git: 11/19 21:30 ================================================================
+
+11/19  ZKD	    21:30  21:35       0              1           5               defs commit for q1 
+
+11/19  SM,ZKD       09:00  11:00       0              1           120             testcases for q1
+
+============committing to git: 11/19 11:01 ================================================================
+
+11/19  ZKD	    11:01   11:05      0              1           4               working code for q1
+11/19  SM,ZKD       14:00   17:30     15              2           195             data defs for q2
+
+============committing to git: 11/19 17:30 ================================================================
+
+11/19  ZKD	    17:35  17:40       0              2           5               initial commit for buddies.rkt
+ 
+11/20  SM,ZKD       12:30   16:10     10              2           210             function defs for buddies.rkt
+
+============committing to git: 11/20 16:15 ================================================================
+
+11/20  ZKD	    16:15  16:20       0              2           5               committing buddies.rkt
+
+11/21  SM,ZKD	    12:10   14:50     30              2           140		  testing with basic testcases written
+
+============committing to git: 11/21 15:51 ================================================================
+
+11/21  ZKD	    15:51  15:56       0              2           5               committing q2 after changes
+
+11/22  SM	    11:10   13:25     15              2           120		  review of q1 and q2
+
+============committing to git: 11/22 13:26 ================================================================
+
+11/22  SM           13:26  13:42       0              2           5               committing after review
+
+11/29  SM,ZKD	    14:10   17:50     30              2           220		  changes to intefaces and testcases
+
+============committing to git: 11/29 17:51 ================================================================
+
+11/29  ZKD	    17:51  17:56       0              2           5               committing q2 after changes
+
+11/30  ZKD	    12:15   13:30      0              2           60              review of q2 and minor changes
+
+11/30  SM	    16:30   17:30      0              2           60              review of q2 and examples written
+
+============committing to git: 11/30 17:31 ================================================================
+
+11/30  SM	    17:31  17:36       0              2           5               committing q2 after changes
+
+12/01  ZKD	    10:15  11:16      10              2           66              on-mouse functions edited
+
+============committing to git: 12/01 11:17 ================================================================
+
+12/01  SM	    11:17  11:20       0              2           3               committing q2 changes done for mouse 
+
+
+12/01  SM	    11:30  12:30       0              2           60              examples written for left out functions
+
+12/01  ZKD	    12:15  13:00       0              1           45              q1 review and minor changes
+
+12/01  SM	    13:30  14:00       0              2           30              reviewing code and cosmetic changes
+
+============committing to git: 12/01 14:01 ================================================================
+
+12/01  SM	    14:01  14:04       0              2           3               committing q2 
+
+Total Time On Task Q1 (minutes)        286
+Total Time On Task Q1 (minutes)        1101
+TOTQ1 (hours and tenths)   	       4.7
+TOTQ2 (hours and tenths)   	       18.3
+   

@@ -1,0 +1,634 @@
+#lang scribble/base
+@(require scribble/manual)
+@title{CS5010 - Problem Set 09 - Test Results}
+@author{pdp-pair-zhikai-smithabn}
+This test suite tests your implementation of Problem Set 09
+@section{File: toys.rkt}
+
+@subsection{Test-Group: classes implement interfaces (2 Points)}
+@margin-note[#:left? #t]{2/2}
+
+@subsubsection{Test (equality, 1/3 partial points)}
+
+@para{The World% class should implement the World<%> interface}
+Input:
+@racketblock{@(implementation? World% World<%>)
+}
+Expected Output:
+@racketblock{@#t
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsubsection{Test (equality, 1/3 partial points)}
+
+@para{The SquareToy% class should implement the Toy<%> interface}
+Input:
+@racketblock{@(implementation? SquareToy% Toy<%>)
+}
+Expected Output:
+@racketblock{@#t
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsubsection{Test (equality, 1/3 partial points)}
+
+@para{The CircleToy% class should implement the Toy<%> interface}
+Input:
+@racketblock{@(implementation? CircleToy% Toy<%>)
+}
+Expected Output:
+@racketblock{@true
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsection{Test-Group: circle-toy tests (2 Points)}
+@margin-note[#:left? #t]{2/2}
+
+@para{Common Definitions}
+
+@racketblock{@(define after-n-ticks
+  (lambda (o n)
+    (if (= n 0) o (after-n-ticks (send o on-tick) (sub1 n)))))
+}@racketblock{@(define X 117)
+}@racketblock{@(define Y 257)
+}@racketblock{@(define CIRCLE (make-circle-toy X Y))
+}@racketblock{@(define CIRCLE-AFTER-TICK (after-n-ticks CIRCLE 1))
+}@racketblock{@(define CIRCLE-AFTER-4-TICKS (after-n-ticks CIRCLE 4))
+}@racketblock{@(define CIRCLE-AFTER-5-TICKS (after-n-ticks CIRCLE 5))
+}@racketblock{@(define CIRCLE-AFTER-10-TICKS (after-n-ticks CIRCLE-AFTER-5-TICKS 5))
+}@racketblock{@(define check-color
+  (lambda (color)
+    (lambda (c)
+      (or (and (string? c) (string-ci=? c color))
+          (and (symbol? c) (string-ci=? (symbol->string c) color))))))
+}
+
+@subsubsection{Test (equality)}
+
+@para{The circle should be created at the correct x-coordinate}
+Input:
+@racketblock{@(send CIRCLE toy-x)
+}
+Expected Output:
+@racketblock{@X
+}
+Expected Output Value:
+@racketblock{@117
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{The circle should be created at the correct y-coordinate}
+Input:
+@racketblock{@(send CIRCLE toy-y)
+}
+Expected Output:
+@racketblock{@Y
+}
+Expected Output Value:
+@racketblock{@257
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{the circle should not move after a tick}
+Input:
+@racketblock{@(send CIRCLE-AFTER-TICK toy-x)
+}
+Expected Output:
+@racketblock{@X
+}
+Expected Output Value:
+@racketblock{@117
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{the circle should not move after a tick}
+Input:
+@racketblock{@(send CIRCLE-AFTER-TICK toy-y)
+}
+Expected Output:
+@racketblock{@Y
+}
+Expected Output Value:
+@racketblock{@257
+}
+Correct
+@subsubsection{Test (predicate)}
+
+@para{circle toys should initially be green}
+Input:
+@racketblock{@(send CIRCLE toy-color)
+}
+Output should match:
+@racketblock{@(check-color "green")
+}
+Correct
+@subsubsection{Test (predicate, 1/4 partial points)}
+
+@para{Color should not change after a single tick}
+Input:
+@racketblock{@(send CIRCLE-AFTER-TICK toy-color)
+}
+Output should match:
+@racketblock{@(check-color "green")
+}
+Correct
+@subsubsection{Test (predicate, 1/4 partial points)}
+
+@para{after 4 ticks the circle should be green}
+Input:
+@racketblock{@(send CIRCLE-AFTER-4-TICKS toy-color)
+}
+Output should match:
+@racketblock{@(check-color "green")
+}
+Correct
+@subsubsection{Test (predicate, 1/2 partial points)}
+
+@para{after 5 ticks the circle should be red}
+Input:
+@racketblock{@(send CIRCLE-AFTER-5-TICKS toy-color)
+}
+Output should match:
+@racketblock{@(check-color "red")
+}
+Correct
+@subsubsection{Test (predicate, 1/2 partial points)}
+
+@para{After 10 ticks the circle should be green again}
+Input:
+@racketblock{@(send CIRCLE-AFTER-10-TICKS toy-color)
+}
+Output should match:
+@racketblock{@(check-color "green")
+}
+Correct
+@subsection{Test-Group: square-toy-tests (3 Points)}
+@margin-note[#:left? #t]{3/3}
+
+@para{Common Definitions}
+
+@racketblock{@(define after-n-ticks
+  (lambda (o n)
+    (if (= n 0) o (after-n-ticks (send o on-tick) (sub1 n)))))
+}@racketblock{@(define MAX-X 400)
+}@racketblock{@(define MIN-X 0)
+}@racketblock{@(define HALF-SQUARE 20)
+}@racketblock{@(define SPEED 13)
+}@racketblock{@(define DX 10)
+}@racketblock{@(define X 200)
+}@racketblock{@(define X-NEAR-WALL (- MAX-X HALF-SQUARE DX))
+}@racketblock{@(define TANGENT (- MAX-X HALF-SQUARE))
+}@racketblock{@(define LEFT-AFTER-TICK (- TANGENT SPEED))
+}@racketblock{@(define Y 250)
+}@racketblock{@(define CENTER-SQUARE (make-square-toy X Y SPEED))
+}@racketblock{@(define CENTER-SQUARE-AFTER-TICK (after-n-ticks CENTER-SQUARE 1))
+}@racketblock{@(define SQUARE-NEAR-WALL (make-square-toy X-NEAR-WALL Y SPEED))
+}@racketblock{@(define SQUARE-NEAR-WALL-AFTER-TICK
+  (after-n-ticks SQUARE-NEAR-WALL 1))
+}@racketblock{@(define SQUARE-NEAR-LEFT-WALL
+  (after-n-ticks SQUARE-NEAR-WALL-AFTER-TICK 27))
+}@racketblock{@(define SQUARE-BOUNCE-LEFT (send SQUARE-NEAR-LEFT-WALL on-tick))
+}@racketblock{@(define SQUARE-MOVING-LEFT
+  (after-n-ticks SQUARE-NEAR-WALL-AFTER-TICK 1))
+}@racketblock{@(define SQUARE-MOVING-LEFT-AFTER-TICK
+  (send SQUARE-MOVING-LEFT on-tick))
+}@racketblock{@(define valid-color? (lambda (s) (or (string? s) (symbol? s))))
+}
+
+@subsubsection{Test (equality)}
+
+@para{the square should be created at the correct x coordinate}
+Input:
+@racketblock{@(send CENTER-SQUARE toy-x)
+}
+Expected Output:
+@racketblock{@X
+}
+Expected Output Value:
+@racketblock{@200
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{the square should be created at the correct y coordinate}
+Input:
+@racketblock{@(send CENTER-SQUARE toy-y)
+}
+Expected Output:
+@racketblock{@Y
+}
+Expected Output Value:
+@racketblock{@250
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{y coordinate should not change on tick}
+Input:
+@racketblock{@(send CENTER-SQUARE-AFTER-TICK toy-y)
+}
+Expected Output:
+@racketblock{@Y
+}
+Expected Output Value:
+@racketblock{@250
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{The square should move by SPEED in the x direction}
+Input:
+@racketblock{@(- (send CENTER-SQUARE-AFTER-TICK toy-x) (send CENTER-SQUARE toy-x))
+}
+Expected Output:
+@racketblock{@SPEED
+}
+Expected Output Value:
+@racketblock{@13
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{If the square were to move past the wall it should be tangent on the next tick}
+Input:
+@racketblock{@(send SQUARE-NEAR-WALL-AFTER-TICK toy-x)
+}
+Expected Output:
+@racketblock{@TANGENT
+}
+Expected Output Value:
+@racketblock{@380
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{after bouncing off the wall the toy should move left by the correct speed}
+Input:
+@racketblock{@(send SQUARE-MOVING-LEFT toy-x)
+}
+Expected Output:
+@racketblock{@LEFT-AFTER-TICK
+}
+Expected Output Value:
+@racketblock{@367
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{the square should move at the correct speed even when moving left}
+Input:
+@racketblock{@(-
+ (send SQUARE-MOVING-LEFT-AFTER-TICK toy-x)
+ (send SQUARE-MOVING-LEFT toy-x))
+}
+Expected Output:
+@racketblock{@(* -1 SPEED)
+}
+Expected Output Value:
+@racketblock{@-13
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{the square should bounce and become tangent to the left wall}
+Input:
+@racketblock{@(send SQUARE-BOUNCE-LEFT toy-x)
+}
+Expected Output:
+@racketblock{@HALF-SQUARE
+}
+Expected Output Value:
+@racketblock{@20
+}
+Correct
+@subsubsection{Test (predicate)}
+
+@para{The square should have a color}
+Input:
+@racketblock{@(send CENTER-SQUARE toy-color)
+}
+Output should match:
+@racketblock{@valid-color?
+}
+Correct
+@subsection{Test-Group: world object tests (8 Points)}
+@margin-note[#:left? #t]{8/8}
+
+@para{Common Definitions}
+
+@racketblock{@(define check-color
+  (lambda (color)
+    (lambda (c)
+      (or (and (string? c) (string-ci=? c color))
+          (and (symbol? c) (string-ci=? (symbol->string c) color))))))
+}@racketblock{@(define after-n-ticks
+  (lambda (o n)
+    (if (= n 0) o (after-n-ticks (send o on-tick) (sub1 n)))))
+}@racketblock{@(define send-keys
+  (lambda (o keys)
+    (if (empty? keys)
+      o
+      (send-keys (send o on-key (first keys)) (rest keys)))))
+}@racketblock{@(define CENTER-X 200)
+}@racketblock{@(define CENTER-Y 250)
+}@racketblock{@(define HALF-SQUARE 20)
+}@racketblock{@(define MAX-X 400)
+}@racketblock{@(define TANGENT-RIGHT (- MAX-X HALF-SQUARE))
+}@racketblock{@(define S-X 10)
+}@racketblock{@(define S-Y 10)
+}@racketblock{@(define DX 5)
+}@racketblock{@(define DY 5)
+}@racketblock{@(define SPEED 13)
+}@racketblock{@(define N-Y 300)
+}@racketblock{@(define N-X (- MAX-X HALF-SQUARE (* 2 DX)))
+}@racketblock{@(define NEW-X (+ N-X DX))
+}@racketblock{@(define NEW-Y (+ N-Y DY))
+}@racketblock{@(define INITIAL-WORLD (make-world SPEED))
+}@racketblock{@(define LOTS-OF-KEYS (list "s" "c" "s" "c" "c" "s" "s"))
+}@racketblock{@(define WORLD-WITH-LOTS-OF-TOYS
+  (send-keys INITIAL-WORLD LOTS-OF-KEYS))
+}@racketblock{@(define WORLD-AFTER-BUTTON-OUTSIDE-TARGET
+  (send INITIAL-WORLD on-mouse S-X S-Y "button-down"))
+}@racketblock{@(define WORLD-WITH-BUTTON-DOWN-IN-TARGET
+  (send INITIAL-WORLD on-mouse
+    (+ CENTER-X DX)
+    (+ CENTER-Y DY)
+    "button-down"))
+}@racketblock{@(define WORLD-AFTER-DRAG
+  (send WORLD-WITH-BUTTON-DOWN-IN-TARGET on-mouse NEW-X NEW-Y "drag"))
+}@racketblock{@(define WORLD-AFTER-BUTTON-UP
+  (send WORLD-AFTER-DRAG on-mouse NEW-X NEW-Y "button-up"))
+}@racketblock{@(define WORLD-WITH-SQUARE-TOY (send WORLD-AFTER-DRAG on-key "s"))
+}@racketblock{@(define get-square-toy (lambda (w) (first (send w get-toys))))
+}@racketblock{@(define WORLD-WITH-SQUARE-AFTER-TICK
+  (send WORLD-WITH-SQUARE-TOY on-tick))
+}@racketblock{@(define WORLD-WITH-SQUARE-NEAR-LEFT-WALL
+  (after-n-ticks WORLD-WITH-SQUARE-AFTER-TICK 27))
+}@racketblock{@(define WORLD-WITH-SQUARE-BOUNCE-LEFT
+  (send WORLD-WITH-SQUARE-NEAR-LEFT-WALL on-tick))
+}@racketblock{@(define WORLD-WITH-CIRCLE (send INITIAL-WORLD on-key "c"))
+}@racketblock{@(define WORLD-WITH-CIRCLE-AFTER-TICK (send WORLD-WITH-CIRCLE on-tick))
+}@racketblock{@(define get-circle-toy (lambda (w) (first (send w get-toys))))
+}@racketblock{@(define WORLD-WITH-2-CIRCLES
+  (send WORLD-WITH-CIRCLE-AFTER-TICK on-key "c"))
+}@racketblock{@(define WORLD-WITH-DIFFERENT-COLORED-CIRCLES
+  (after-n-ticks WORLD-WITH-2-CIRCLES 4))
+}@racketblock{@(define WORLD-WITH-2-SAME-COLORED-CIRCLES
+  (send WORLD-WITH-DIFFERENT-COLORED-CIRCLES on-tick))
+}@racketblock{@(define get-toy-colors
+  (lambda (w)
+    (map (lambda (t) (send t toy-color)) (send w get-toys))))
+}@racketblock{@(define to-colorstring
+  (lambda (s)
+    (cond
+     ((string? s) (string-downcase s))
+     ((symbol? s) (string-downcase (symbol->string s)))
+     (else (error "invalid colorstring")))))
+}@racketblock{@(define color-set=?
+  (lambda (colors)
+    (lambda (c) (set=? colors (map to-colorstring c)))))
+}
+
+@subsubsection{Test (equality)}
+
+@para{the target should initially be in the center of the canvas}
+Input:
+@racketblock{@(send INITIAL-WORLD target-x)
+}
+Expected Output:
+@racketblock{@CENTER-X
+}
+Expected Output Value:
+@racketblock{@200
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{the target should initially be in the center of the canvas}
+Input:
+@racketblock{@(send INITIAL-WORLD target-y)
+}
+Expected Output:
+@racketblock{@CENTER-Y
+}
+Expected Output Value:
+@racketblock{@250
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{initially the target is not selected}
+Input:
+@racketblock{@(send INITIAL-WORLD target-selected?)
+}
+Expected Output:
+@racketblock{@#f
+}
+Expected Output Value:
+@racketblock{@#f
+}
+Correct
+@subsubsection{Test (equality, 1 partial points)}
+
+@para{each s/c key event should add a toy to the world}
+Input:
+@racketblock{@(length (send WORLD-WITH-LOTS-OF-TOYS get-toys))
+}
+Expected Output:
+@racketblock{@(length LOTS-OF-KEYS)
+}
+Expected Output Value:
+@racketblock{@7
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{button down outside the target should not select it}
+Input:
+@racketblock{@(send WORLD-AFTER-BUTTON-OUTSIDE-TARGET target-selected?)
+}
+Expected Output:
+@racketblock{@#f
+}
+Expected Output Value:
+@racketblock{@#f
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{the target should be selected after a button down inside of it}
+Input:
+@racketblock{@(send WORLD-WITH-BUTTON-DOWN-IN-TARGET target-selected?)
+}
+Expected Output:
+@racketblock{@#t
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{the target should be smoothly dragged to the new position}
+Input:
+@racketblock{@(send WORLD-AFTER-DRAG target-x)
+}
+Expected Output:
+@racketblock{@N-X
+}
+Expected Output Value:
+@racketblock{@370
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{the target should be smoothly dragged to the new location}
+Input:
+@racketblock{@(send WORLD-AFTER-DRAG target-y)
+}
+Expected Output:
+@racketblock{@N-Y
+}
+Expected Output Value:
+@racketblock{@300
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{the created square should have the correct x coordinate}
+Input:
+@racketblock{@(send (get-square-toy WORLD-WITH-SQUARE-TOY) toy-x)
+}
+Expected Output:
+@racketblock{@N-X
+}
+Expected Output Value:
+@racketblock{@370
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{the created square should have the correct y-coordinate}
+Input:
+@racketblock{@(send (get-square-toy WORLD-WITH-SQUARE-TOY) toy-y)
+}
+Expected Output:
+@racketblock{@N-Y
+}
+Expected Output Value:
+@racketblock{@300
+}
+Correct
+@subsubsection{Test (equality, 1 partial points)}
+
+@para{the square should bounce off the right edge}
+Input:
+@racketblock{@(send (get-square-toy WORLD-WITH-SQUARE-AFTER-TICK) toy-x)
+}
+Expected Output:
+@racketblock{@TANGENT-RIGHT
+}
+Expected Output Value:
+@racketblock{@380
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{the square should correctly bounce off the left edge}
+Input:
+@racketblock{@(send (get-square-toy WORLD-WITH-SQUARE-BOUNCE-LEFT) toy-x)
+}
+Expected Output:
+@racketblock{@HALF-SQUARE
+}
+Expected Output Value:
+@racketblock{@20
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{the target should become unselected on button up}
+Input:
+@racketblock{@(send WORLD-AFTER-BUTTON-UP target-selected?)
+}
+Expected Output:
+@racketblock{@#f
+}
+Expected Output Value:
+@racketblock{@#f
+}
+Correct
+@subsubsection{Test (predicate)}
+
+@para{the created circle should initially be green}
+Input:
+@racketblock{@(send (get-circle-toy WORLD-WITH-CIRCLE) toy-color)
+}
+Output should match:
+@racketblock{@(check-color "green")
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{the circle should be created at the right x coordinate}
+Input:
+@racketblock{@(send (get-circle-toy WORLD-WITH-CIRCLE) toy-x)
+}
+Expected Output:
+@racketblock{@CENTER-X
+}
+Expected Output Value:
+@racketblock{@200
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{the circle should be created at the correct y coordinate}
+Input:
+@racketblock{@(send (get-circle-toy WORLD-WITH-CIRCLE) toy-y)
+}
+Expected Output:
+@racketblock{@CENTER-Y
+}
+Expected Output Value:
+@racketblock{@250
+}
+Correct
+@subsubsection{Test (predicate, 1 partial points)}
+
+@para{there should be 2 different colored circles}
+Input:
+@racketblock{@(get-toy-colors WORLD-WITH-DIFFERENT-COLORED-CIRCLES)
+}
+Output should match:
+@racketblock{@(color-set=? (list "red" "green"))
+}
+Correct
+@subsubsection{Test (equality, 1 partial points)}
+
+@para{both circles should now be red}
+Input:
+@racketblock{@(get-toy-colors WORLD-WITH-2-SAME-COLORED-CIRCLES)
+}
+Expected Output:
+@racketblock{@(list "red" "red")
+}
+Expected Output Value:
+@racketblock{@("red" "red")
+}
+Correct
+@section{Results}
+Successes: 39
+@linebreak{} Wrong Outputs: 0
+@linebreak{} Errors: 0
+@linebreak{} Achieved Points: 15
+@linebreak{} Total Points (rounded): 15/15

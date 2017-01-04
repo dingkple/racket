@@ -1,0 +1,42 @@
+Date   Who          Start  Stop    Interruptions  Question   TimeOnTask                 Comments
+11/11  ZKD          20:25  22:26       0	      1           121	          add more docs to q1
+
+============committing to git: 11/11 22:30 ================================================================
+
+11/11  ZKD	    22:30  22:35       0              1           5               defs commit for q1 
+
+11/12  SM,ZKD       09:00  11:00       0              1           120             logic & coding of q1
+
+============committing to git: 11/12 11:01 ================================================================
+
+11/12  ZKD	    11:01   11:05      0              1           4               basic working code for q1
+11/12  SM,ZKD       14:00   17:30     15              1           195             remaining code for q1
+
+============committing to git: 11/12 17:30 ================================================================
+
+11/12  ZKD	    17:35  17:40       0              1           5               committing toys.rkt with all functions written
+
+ 
+11/13  SM,ZKD       12:30   15:10     10              1           150             testcases and testing of q1
+
+============committing to git: 11/13 15:15 ================================================================
+
+11/13  ZKD	    15:15  15:20       0              1           5               committing toys.rkt with testcases
+
+
+11/14  SM,ZKD	    12:10   14:50     30              1           140		  changes after review 1, private functions
+============committing to git: 11/14 15:51 ================================================================
+
+11/14  ZKD	    15:51  15:56       0              1           5               committing toys.rkt after changes
+
+11/15  SM	    11:10   13:25     15              1           120		  review of q1 
+
+============committing to git: 11/15 13:26 ================================================================
+
+11/15  SM           13:26  13:42       0              1           5               committing after review
+
+
+
+Total Time On Task Q1 (minutes)        846
+TOTQ1 (hours and tenths)   	       14.1
+   

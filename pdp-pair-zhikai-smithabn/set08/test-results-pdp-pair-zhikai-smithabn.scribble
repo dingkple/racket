@@ -1,0 +1,431 @@
+#lang scribble/base
+@(require scribble/manual)
+@title{CS5010 - Problem Set 08 - Test Results}
+@author{pdp-pair-zhikai-smithabn}
+This test suite tests your implementation of Problem Set 08
+@section{File: pitchers.rkt}
+
+@subsection{Test-Group: pitchers-after-moves (4 Points)}
+@margin-note[#:left? #t]{8/3/4}
+
+@para{Common Definitions}
+
+@racketblock{@(define PITCHERS-0 (list-to-pitchers '((1 1))))
+}@racketblock{@(define PITCHERS-1 (list-to-pitchers '((8 8) (5 0) (3 0))))
+}@racketblock{@(define PITCHERS-2 (list-to-pitchers '((8 3) (5 5) (3 0))))
+}@racketblock{@(define PITCHERS-3 (list-to-pitchers '((8 0) (3 3) (5 5))))
+}@racketblock{@(define PITCHERS-4
+  (list-to-pitchers '((12 4) (5 5) (3 3) (2 0) (4 0) (24 0) (0 0))))
+}@racketblock{@(define MOVES-1 (list (make-move 1 2)))
+}@racketblock{@(define MOVES-2 (list (make-move 1 2) (make-move 2 1)))
+}@racketblock{@(define MOVES-3 (list (make-move 1 3)))
+}@racketblock{@(define MOVES-4 (list (make-move 2 5) (make-move 3 6)))
+}@racketblock{@(define MOVES-5
+  (list
+   (make-move 1 6)
+   (make-move 2 6)
+   (make-move 3 6)
+   (make-move 6 7)
+   (make-move 6 5)
+   (make-move 5 3)
+   (make-move 6 1)))
+}
+
+@subsubsection{Test (equality, 1/3 partial points)}
+
+@para{pitchers-to-list/list-to-pitchers}
+Input:
+@racketblock{@(pitchers-to-list (list-to-pitchers '((8 8) (5 0) (3 0))))
+}
+Expected Output:
+@racketblock{@'((8 8) (5 0) (3 0))
+}
+Expected Output Value:
+@racketblock{@((8 8) (5 0) (3 0))
+}
+Correct
+@subsubsection{Test (equality, 1/3 partial points)}
+
+@para{}
+Input:
+@racketblock{@(pitchers-to-list (pitchers-after-moves PITCHERS-2 empty))
+}
+Expected Output:
+@racketblock{@'((8 3) (5 5) (3 0))
+}
+Expected Output Value:
+@racketblock{@((8 3) (5 5) (3 0))
+}
+Correct
+@subsubsection{Test (equality, 1/3 partial points)}
+
+@para{}
+Input:
+@racketblock{@(pitchers-to-list (pitchers-after-moves PITCHERS-1 MOVES-1))
+}
+Expected Output:
+@racketblock{@'((8 3) (5 5) (3 0))
+}
+Expected Output Value:
+@racketblock{@((8 3) (5 5) (3 0))
+}
+Correct
+@subsubsection{Test (equality, 1/3 partial points)}
+
+@para{}
+Input:
+@racketblock{@(pitchers-to-list (pitchers-after-moves PITCHERS-1 MOVES-2))
+}
+Expected Output:
+@racketblock{@'((8 8) (5 0) (3 0))
+}
+Expected Output Value:
+@racketblock{@((8 8) (5 0) (3 0))
+}
+Correct
+@subsubsection{Test (equality, 1/3 partial points)}
+
+@para{}
+Input:
+@racketblock{@(pitchers-to-list (pitchers-after-moves PITCHERS-3 MOVES-2))
+}
+Expected Output:
+@racketblock{@'((8 3) (3 0) (5 5))
+}
+Expected Output Value:
+@racketblock{@((8 3) (3 0) (5 5))
+}
+Correct
+@subsubsection{Test (equality, 1/3 partial points)}
+
+@para{}
+Input:
+@racketblock{@(pitchers-to-list (pitchers-after-moves PITCHERS-1 MOVES-3))
+}
+Expected Output:
+@racketblock{@'((8 5) (5 0) (3 3))
+}
+Expected Output Value:
+@racketblock{@((8 5) (5 0) (3 3))
+}
+Correct
+@subsubsection{Test (equality, 1/3 partial points)}
+
+@para{}
+Input:
+@racketblock{@(pitchers-to-list (pitchers-after-moves PITCHERS-3 MOVES-3))
+}
+Expected Output:
+@racketblock{@'((8 0) (5 5) (3 3))
+}
+Expected Output Value:
+@racketblock{@((8 0) (5 5) (3 3))
+}
+Wrong Output:
+@racketblock{@((8 0) (3 3) (5 5))
+}
+@subsubsection{Test (equality, 1/3 partial points)}
+
+@para{}
+Input:
+@racketblock{@(pitchers-to-list (pitchers-after-moves PITCHERS-4 MOVES-4))
+}
+Expected Output:
+@racketblock{@'((12 4) (5 1) (3 0) (2 0) (4 4) (24 3) (0 0))
+}
+Expected Output Value:
+@racketblock{@((12 4) (5 1) (3 0) (2 0) (4 4) (24 3) (0 0))
+}
+Correct
+@subsubsection{Test (equality, 1/3 partial points)}
+
+@para{}
+Input:
+@racketblock{@(pitchers-to-list (pitchers-after-moves PITCHERS-4 MOVES-5))
+}
+Expected Output:
+@racketblock{@'((12 8) (5 0) (3 3) (2 0) (4 1) (24 0) (0 0))
+}
+Expected Output Value:
+@racketblock{@((12 8) (5 0) (3 3) (2 0) (4 1) (24 0) (0 0))
+}
+Correct
+@subsection{Test-Group: solution tests (5 Points)}
+@margin-note[#:left? #t]{5/5}
+
+@subsubsection{Test (equality)}
+
+@para{}
+Input:
+@racketblock{@(solution '(2) 1)
+}
+Expected Output:
+@racketblock{@false
+}
+Expected Output Value:
+@racketblock{@#f
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{}
+Input:
+@racketblock{@(solution '(2) 2)
+}
+Expected Output:
+@racketblock{@empty
+}
+Expected Output Value:
+@racketblock{@()
+}
+Correct
+@subsubsection{Test (predicate, 1/2 partial points)}
+
+@para{}
+Input:
+@racketblock{@(solution '(8 5 3) 4)
+}
+Output should match:
+@racketblock{@(check-moves '(8 5 3) 4)
+}
+Correct
+@subsubsection{Test (predicate, 1/2 partial points)}
+
+@para{}
+Input:
+@racketblock{@(solution '(10 7 3) 5)
+}
+Output should match:
+@racketblock{@(check-moves '(10 7 3) 5)
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{}
+Input:
+@racketblock{@(solution '(8 4 2) 3)
+}
+Expected Output:
+@racketblock{@false
+}
+Expected Output Value:
+@racketblock{@#f
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{}
+Input:
+@racketblock{@(solution '(9 8 7) 4)
+}
+Expected Output:
+@racketblock{@false
+}
+Expected Output Value:
+@racketblock{@#f
+}
+Correct
+@subsubsection{Test (predicate, 1/2 partial points)}
+
+@para{}
+Input:
+@racketblock{@(solution '(8 5 3 120) 4)
+}
+Output should match:
+@racketblock{@(check-moves '(8 5 3 120) 4)
+}
+Correct
+@subsubsection{Test (predicate, 1/2 partial points)}
+
+@para{}
+Input:
+@racketblock{@(solution '(16 11 7) 9)
+}
+Output should match:
+@racketblock{@(check-moves '(16 11 7) 9)
+}
+Correct
+@subsubsection{Test (predicate, 1/2 partial points)}
+
+@para{}
+Input:
+@racketblock{@(solution '(8 5 3) 7)
+}
+Output should match:
+@racketblock{@(check-moves '(8 5 3) 7)
+}
+Correct
+@subsubsection{Test (predicate, 1 partial points)}
+
+@para{}
+Input:
+@racketblock{@(solution '(5 1 1 1 1) 2)
+}
+Output should match:
+@racketblock{@(check-moves '(5 1 1 1 1) 2)
+}
+Correct
+@section{File: river.rkt}
+
+@subsection{Test-Group: pitchers-after-moves (6 Points)}
+@margin-note[#:left? #t]{6/6}
+
+@para{Common Definitions}
+
+@racketblock{@(define PITCHERS-0 (river:list-to-pitchers '((2 0) (5 0) (10 0))))
+}@racketblock{@(define MOVES-0
+  (list
+   (river:make-fill 2)
+   (river:make-move 2 1)
+   (river:make-move 2 3)
+   (river:make-dump 1)
+   (river:make-fill 2)
+   (river:make-move 2 1)
+   (river:make-move 2 3)
+   (river:make-dump 1)))
+}@racketblock{@(define PITCHERS-1 (river:list-to-pitchers '((13 0) (0 0) (5 0))))
+}@racketblock{@(define MOVES-1
+  (list
+   (river:make-fill 1)
+   (river:make-move 1 2)
+   (river:make-move 2 3)
+   (river:make-move 1 3)
+   (river:make-dump 3)
+   (river:make-fill 2)
+   (river:make-dump 1)
+   (river:make-dump 2)))
+}
+
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{pitchers-to-list/list-to-pitchers}
+Input:
+@racketblock{@(river:pitchers-to-list (river:list-to-pitchers '((8 8) (5 0) (3 0))))
+}
+Expected Output:
+@racketblock{@'((8 8) (5 0) (3 0))
+}
+Expected Output Value:
+@racketblock{@((8 8) (5 0) (3 0))
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{}
+Input:
+@racketblock{@(river:pitchers-to-list (river:pitchers-after-moves PITCHERS-0 empty))
+}
+Expected Output:
+@racketblock{@'((2 0) (5 0) (10 0))
+}
+Expected Output Value:
+@racketblock{@((2 0) (5 0) (10 0))
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{}
+Input:
+@racketblock{@(river:pitchers-to-list
+ (river:pitchers-after-moves PITCHERS-0 MOVES-0))
+}
+Expected Output:
+@racketblock{@'((2 0) (5 0) (10 6))
+}
+Expected Output Value:
+@racketblock{@((2 0) (5 0) (10 6))
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{}
+Input:
+@racketblock{@(river:pitchers-to-list
+ (river:pitchers-after-moves PITCHERS-1 MOVES-1))
+}
+Expected Output:
+@racketblock{@'((13 0) (0 0) (5 0))
+}
+Expected Output Value:
+@racketblock{@((13 0) (0 0) (5 0))
+}
+Correct
+@subsubsection{Test (predicate, 1/2 partial points)}
+
+@para{}
+Input:
+@racketblock{@(river:solution '(7 3) 2)
+}
+Output should match:
+@racketblock{@(river:check-moves '(7 3) 2)
+}
+Correct
+@subsubsection{Test (predicate, 1/2 partial points)}
+
+@para{}
+Input:
+@racketblock{@(river:solution '(10 3 5) 1)
+}
+Output should match:
+@racketblock{@(river:check-moves '(10 3 5) 1)
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{}
+Input:
+@racketblock{@(river:solution '(8 4 2) 3)
+}
+Expected Output:
+@racketblock{@false
+}
+Expected Output Value:
+@racketblock{@#f
+}
+Correct
+@subsubsection{Test (predicate, 1/2 partial points)}
+
+@para{}
+Input:
+@racketblock{@(river:solution '(2 5 10) 6)
+}
+Output should match:
+@racketblock{@(river:check-moves '(2 5 10) 6)
+}
+Correct
+@subsubsection{Test (predicate, 1/2 partial points)}
+
+@para{}
+Input:
+@racketblock{@(river:solution '(3 5) 4)
+}
+Output should match:
+@racketblock{@(river:check-moves '(3 5) 4)
+}
+Correct
+@subsubsection{Test (predicate, 1/2 partial points)}
+
+@para{}
+Input:
+@racketblock{@(river:solution '(11 7) 6)
+}
+Output should match:
+@racketblock{@(river:check-moves '(11 7) 6)
+}
+Correct
+@subsubsection{Test (predicate, 1/2 partial points)}
+
+@para{}
+Input:
+@racketblock{@(river:solution '(8 8 40 80 120 5 5) 4)
+}
+Output should match:
+@racketblock{@(river:check-moves '(8 8 40 80 120 5 5) 4)
+}
+Correct
+@section{Results}
+Successes: 29
+@linebreak{} Wrong Outputs: 1
+@linebreak{} Errors: 0
+@linebreak{} Achieved Points: 41/3
+@linebreak{} Total Points (rounded): 14/15

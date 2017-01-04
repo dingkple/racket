@@ -1,0 +1,90 @@
+#lang racket
+(require rackunit)
+(require "extras.rkt")
+(require 2htdp/universe)   
+(require 2htdp/image)      
+
+
+;; World%     -- a class that satisfies the World<%> interface (shown below).
+;; SquareToy% -- a class that satisfies the Toy<%> interface
+;; CircleToy% -- a class that satisfies the Toy<%> interface
+
+;; make-world : PosInt -> World%
+;; RETURNS: a world with a target, but no toys, and in which any
+;; toys created in the future will travel at the given speed (in pixels/tick).
+
+;; run : PosNum PosInt -> World%
+;; GIVEN: a frame rate (in seconds/tick) and a square-speed (in pixels/tick),
+;; creates and runs a world.  Returns the final state of the world.
+
+;; make-square-toy : PosInt PosInt PosInt -> SquareToy%
+;; GIVEN: an x and a y position, and a speed
+;; RETURNS: an object representing a square toy at the given position,
+;; travelling right at the given speed.
+
+;; make-circle-toy : PosInt PosInt -> CircleToy%
+;; GIVEN: an x and a y position
+;; RETURNS: an object represeenting a circle toy at the given position.
+
+;; Interfaces:
+
+;; (define World<%>
+;;   (interface ()
+
+;;     ;; -> World<%>
+;;     ;; Returns the World<%> that should follow this one after a tick
+;;     on-tick                             
+
+;;     ;; Integer Integer MouseEvent -> World<%>
+;;     ;; Returns the World<%> that should follow this one after the
+;;     ;; given MouseEvent
+;;     on-mouse
+
+;;     ;; KeyEvent -> World<%>
+;;     ;; Returns the World<%> that should follow this one after the
+;;     ;; given KeyEvent
+;;     on-key
+
+;;     ;; -> Scene
+;;     ;; Returns a Scene depicting this world
+;;     ;; on it.
+;;     on-draw 
+    
+;;     ;; -> Integer
+;;     ;; RETURN: the x and y coordinates of the target
+;;     target-x
+;;     target-y
+
+;;     ;; -> Boolean
+;;     ;; Is the target selected?
+;;     target-selected?
+
+;;     ;; -> ListOfToy<%>
+;;     get-toys
+
+;; ))
+
+;; (define Toy<%> 
+;;   (interface ()
+
+;;     ;; -> Toy<%>
+;;     ;; returns the Toy that should follow this one after a tick
+;;     on-tick                             
+
+;;     ;; Scene -> Scene
+;;     ;; Returns a Scene like the given one, but with this toy drawn
+;;     ;; on it.
+;;     add-to-scene
+
+;;     ;; -> Int
+;;     toy-x
+;;     toy-y
+
+;;     ;; -> Boolean
+;;     toy-selected?
+
+;;     ;; -> ColorString
+;;     ;; returns the current color of this toy
+;;     toy-color
+
+;;     ))

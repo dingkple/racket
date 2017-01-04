@@ -1,0 +1,799 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname pitchers) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
+
+;;INTRO:
+;;the algorithm for this problem is BFS, in every loop, we get all the possible
+;;new status that can be reach within one move from the current set of status,
+;; and iff the goal have NOT appeared, we continue, until there's no more new 
+;;status can be found in a loop.
+
+(require "extras.rkt")
+(require rackunit)
+(require "sets.rkt")
+
+(provide 
+ list-to-pitchers
+ pitchers-to-list
+ pitchers-after-moves
+ make-move
+ move-src
+ move-tgt
+ move?
+ solution)
+
+;;DATA DEFINITIONS
+
+;; PosInt means Positive Integers
+;; NonNegInt means Non negative Integer
+
+;; A ListOf<NonNegInt> is
+;;-- empty ; an empty list
+;;-- (cons NonNegInt ListOf<NonNegInt>) 
+; NonNegInt added to the ListOf<NonNegInt>
+
+;;Template:
+;; loni-fn: ListOf<NonNegInt> -> ??
+;;(define (loni-fn lstni)
+;;  (cond
+;;    [(empty? lstni) ...]
+;;    [else (...
+;;           (first lstni)
+;;           ( loni-fn (rest lstni)))]))
+
+;; a NELONI(non-empty list of NonNegInt) is:
+;;  --(cons NonNegInt ListOf<NonNegInt>) 
+; a NonNegInt added to list of NonNegInt
+
+;; Template:
+;; neloni-fn: NELONI -> ??
+;; (define (neloni-fn nelstni)
+;;   (... (first nelstni)
+;;        (neloni-fn (rest nelstni))))
+
+;; A ListOf<PosInt> is
+;;-- empty ; an empty list
+;;-- (cons PosInt ListOf<PosInt>) ; PosInt added to the ListOf<PosInt>
+
+;;Template:
+;; lopi-fn: ListOf<PosInt> -> ??
+;;(define (lopi-fn lstpi)
+;;  (cond
+;;    [(empty? lstpi) ...]
+;;    [else (...
+;;           (first lstpi)
+;;           ( lopi-fn (rest lstpi)))]))
+
+;; a NELOPI(non-empty list of PosInt) is:
+;;  --(cons PosInt ListOf<PosInt>) 
+
+;; Template:
+;; nelopi-fn: NELOPI -> ??
+;;(define (nelopi-fn nelstpi)
+;;  (... (first nelstpi)
+;;       (nelopi-fn (rest nelstpi))))
+
+;; SinglePitcherExternalRep is a (list PosInt NonNegInt)
+;; INTERP:
+;; the first PosInt represents the capacity of the pitcher
+;; the second NonNegInt represents the current amount of contents 
+;; in the pitcher
+;; WHERE: 0 <= contents <= capacity
+;; Template:
+;; sp-fn: SinglePitcherExternalRep -> ??
+;; (define (sp-fn sp)
+;;   (... (first sp)
+;;        (second sp)))
+
+;; A ListOf<SinglePitcherExternalRep> (LOSPER) is
+;;-- empty ; an empty list
+;;-- (cons SinglePitcherExternalRep LOSPER) 
+; SinglePitcherExternalRep added to the LOSPER
+
+;;Template:
+;; lstsinglepxr-fn: LOSPER -> ??
+;;(define (lstsinglepxr-fn sepr)
+;;  (cond
+;;    [(empty? sepr) ...]
+;;    [else (...
+;;           (sp-fn (first sepr))
+;;           (lstsinglepxr-fn (rest sepr)))]))
+
+;; PitchersExternalRep is one of:
+;;  --(cons SinglePitcherExternalRep LOSPER)
+
+;; INTERPRETATION: the list of pitchers, from 1 to n, with their contents
+;; and capacity and for each i, 0 <= contents_i <= capacity_i
+;; EXAMPLE: ((10 5) (8 7)) is a list of two pitchers. The first has
+;; capacity 10 and currently holds 5; the second has capacity 8 and
+;; currently holds 7.
+;; Template:
+;; per-fn: PitchersExternalRep -> ??
+;;(define (per-fn per)
+;;  (... (sp-fn (first per))
+;;       (lstsinglepxr-fn (rest per))))
+
+
+(define-struct move (src tgt))
+;; A Move is a (make-move PosInt PosInt)
+;; WHERE: src and tgt are different
+;; INTERP: (make-move i j) means pour from pitcher i to pitcher j.
+;; 'pitcher i' refers to the i-th pitcher in the PitchersExternalRep.
+;; 'pitcher j' refers to the j-th pitcher in the PitchersExternalRep.
+;; Template:
+;; move-fn: Move -> ??
+;; (define (move-fn m)
+;;   (... (move-src m)
+;;        (move-tgt m)))
+
+
+;; a Change is one of:
+;; --(list NELONI '() NELONI)
+;; --(list NELONI Move NELONI)
+;; INTERP:
+;; the first item in the list is  NELONI which represents the starting 
+;; status(list of current amount of contents) of a list of pitchers
+;; the second item of the list can be empty or Move and there 
+;; interpretation is as follows:
+;;  empty is used when starting the game indicating no move is made yet
+;;  Move is the move(i,j) executed on pitcher-i to pitcher-j
+;; the last item in the list is  NELONI is the status(list of current 
+;; amount of contents) of the pitchers after executing the move
+;; iff the second part is empty, means this is initial change, nothing is
+;; changed, the first NELONI is the same as the second NELONI
+
+;; Template:
+;; ch-fn: Change -> ??
+;; (define (ch-fn c)
+;;   (... (first c)
+;;        (second c)
+;;        (third c)))
+
+;; a LOC is list of Changes, which is one of:
+;;  --empty ; an empty list 
+;;  --(cons Change LOC) ; a change is added to LOC
+;; Template:
+;; loc-fn: LOC -> ??
+;; (define (loc-fn loc)
+;;   (cond
+;;     [(empty? loc) ...]
+;;     [else (... (first loc)
+;;                (loc-fn (rest loc)))]))
+
+(define-struct pitchersInternalRep (capacitylst status))
+;; a PitchersInternalRep is a (make-pitchersInternalRep NELOPI NELONI)
+;; INTERP:
+;; capacitylst is the list of is the capacities of the pitchers, 
+;; and status is the list of current amount of contents in each of
+;; the pitchers. 
+;; A pitchersInternalRep is generated from the PitchersExternalRep, since 
+;; the PitchersExternalRep has at least one SinglePitcherExternalRep, so 
+;; both capacitylst and status are non-empty list and the members 
+;; in the list keep the same order from it.
+;; Template:
+;; pir-fn: PitchersInternalRep -> ??
+;; (define (pir-fn pir)
+;;   (... (nelopi-fn (pitchersInternalRep-capacitylst pir)
+;;        (neloni-fn (pitchersInternalRep-status pir))))
+
+;; a Plan is list of Moves, it's one of
+;;  --empty ; an empty list
+;;  --(cons Move Plan) ; a move added to Plan
+
+;; Template:
+;; pl-fn: Plan -> ??
+;; (define (pl-fn p)
+;;   (cond
+;;     [(empty? p) ...]
+;;     [else (...
+;;               (move-fn(first p))
+;;               (pl-fn (rest p)))]))
+
+;; a MaybePlan is one of:
+;;  --false
+;;  --Plan
+;; INTERP:
+;;  false representing it's impossible to make one of the pitchers having
+;;  goal amount of contents
+;;  plan representing the steps to make at least one of the pitcher contain
+;;  goal amount of contents
+;; Template:
+;; mp-fn: MaybePlan -> ??
+;; (define (mp-fn mp)
+;;   (cond
+;;     [(false? mp) ...]
+;;     [(list? mp) ...]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;EXAMPLES FOR TESTS:
+
+(define pitchers-external-example1
+  '((10 10) (7 0) (3 0)))
+
+(define pitchersInternalRep-example1
+  (make-pitchersInternalRep '(10 7 3) '(10 0 0)))
+
+(define pitchersInternalRep-example2
+  (make-pitchersInternalRep '(10 7 3) '(2 5 3)))
+
+(define plan-example1
+  (list
+   (make-move 1 2)
+   (make-move 2 3)
+   (make-move 3 1)
+   (make-move 2 3)
+   (make-move 3 1)
+   (make-move 2 3)
+   (make-move 1 2)
+   (make-move 2 3)))
+
+(define pitchers-example1 '(10 7 3))
+
+(define loc-example1 
+  '(((10 0 0) () (10 0 0)) 
+    ((10 0 0) (make-move 1 2) (3 7 0))
+    ((10 0 0) (make-move 1 3) (7 0 3))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; list-to-pitchers : PitchersExternalRep -> PitchersInternalRep
+;; GIVEN: a PitchersExternalRep
+;; RETURNS: a pitchersInternalRep generated from the given PitchersExternalRep
+;; EXAMPLES: (list-to-pitchers '((10 8) (7 3))) -> 
+;;                 (make-pitchersInternalRep '(10 7) '(8 3))
+;; STRATEGY: function composition
+(define (list-to-pitchers pit-ext-rep)
+  (make-pitchersInternalRep 
+   (get-capacitylst-from-ext pit-ext-rep)
+   (get-status-from-ext pit-ext-rep)))
+
+;; pitchers-to-list: PitchersInternalRep  -> PitchersExternalRep
+;; GIVEN: An internal representation of a set of pitchers
+;; RETURNS: a PitchersExternalRep generated from the given internal 
+;; representation of a set of pitchers, the members are kept the same 
+;; order in the output as encountered in the input.
+;; EXAMPLES: (pitchers-to-list (make-pitchersInternalRep '(10 9) '(0 0))) 
+;;                  ->'((10 0) '(9 0))
+;; STRATEGY: structure decomposition on pitchers : PitchersInternalRep 
+(define (pitchers-to-list pitchers)
+  (reverse
+   (pitcher-to-external 
+    (pitchersInternalRep-capacitylst pitchers) 
+    (pitchersInternalRep-status pitchers))))
+
+;; pitcher-to-external: NELOPI NELONI -> PitchersExternalRep
+;; GIVEN: capacitylst is the list of capacities of some given pitchers
+;; a list of their current amount of contents
+;; RETURNS: a PitchersExternalRep generated from the given capacitylst and 
+;;    status. 
+;; WHERE :The members of PitchersExternalRep are kept in the same order 
+;; as encountered in input.
+;; EXAMPLES: (pitcher-to-external '(10 9) '(0 0)) -> '((10 0) (9 0))
+;; STRATEGY: HOFC
+(define (pitcher-to-external capacitylst status)
+  (foldl
+   ;; PosInt PitcherExternalRep -> PitcherExternalRep
+   ;; GIVEN: a pitcher's capacity and a PitcherExternalRep 
+   ;; RETURNS: a SinglePitcherExternalRep of the given pitcher added to
+   ;;     the head of the given PitchersExternalRep
+   (lambda (p ans)
+     (cons 
+      (single-pitcher-generate capacitylst status (length ans)) ans))
+   empty
+   capacitylst))
+
+;; single-pitcher-generate: NELOPI NELONI PosInt -> SinglePitcherExternalRep
+;; GIVEN: a list of PosInt and a list of NonNegInt and a PosInt
+;; WHERE: 1)the first list of PosInt is the pitchers capacities
+;;        2)the second list of NonNegInts is the pitchers current
+;;     amount of contents
+;;        3)n is no less than 0 and less than the length of given pitchers
+;; RETURNS: a single pitcher external reperesentation with capacity and
+;; content taken from the nth index in the list of capacitylst and status 
+;; respectively
+;; EXAMPLES: 
+;; (single-pitcher-generate '(10 9) '(0 0) 0) -> '(10 0)
+;; (single-pitcher-generate '(10 9) '(0 0) 1) -> '(9 0)
+;; STRATEGY: function composition
+(define (single-pitcher-generate capacitylst status n)
+  (list (list-ref capacitylst n) (list-ref status n)))
+
+;; get-status-from-ext: PitchersExternalRep -> NELONI
+;; GIVEN: a PitchersExternalRep 
+;; RETURNS: a list of NonNegInt representing current amount of contents
+;;     of pitchers extracted from the given PitchersExternalRep
+;; EXAMPLES: (get-status-from-ext '((10 9) (9 0))) -> '(9 0)
+;; STRATEGY: structure decomposition on p: SinglePitcherExternalRep
+(define (get-status-from-ext pit-ext-rep)
+  (map
+   ;; SinglePitcherExternalRep -> NonNegInt
+   ;; GIVEN: a SinglePitcherExternalRep, representing a single pitcher
+   ;; RETURNS: the current amount of contents in the given pitcher
+   (lambda (p)
+     (second p))
+   pit-ext-rep))
+
+;; get-capacitylst-from-ext: PitchersExternalRep -> NELOPI
+;; GIVEN: a PitchersExternalRep
+;; RETURNS: a list of PosInt representing capacities of a 
+;; of pitchers extracted from the given PitchersExternalRep
+;; EXAMPLES: (get-capacitylst-from-ext '((10 9) (8 0))) -> '(10 8)
+;; STRATEGY: structure decomposition on p: SinglePitcherExternalRep
+(define (get-capacitylst-from-ext pit-ext-rep)
+  (map
+   ;; SinglePitcherExternalRep -> PosInt
+   ;; GIVEN: a SinglePitcherExternalRep, representing a single pitcher
+   ;; RETURNS: the capacity of the given pitcher
+   (lambda (p)
+     (first p))
+   pit-ext-rep))
+
+
+;; pitchers-after-moves : PitchersInternalRep ListOf<Move> 
+;;                                                   -> PitchersInternalRep
+;; GIVEN: An internal representation of a set of pitchers, and a sequence
+;; of moves
+;; WHERE: every move refers only to pitchers that are in the set of pitchers.
+;; RETURNS: the internal representation of the set of pitchers that should
+;; result after executing the given list of moves, in order, on the given
+;; set of pitchers.
+;; EXAMPLES: (pitchers-after-moves 
+;;             (make-pitchersInternalRep '(10 9) '(10 0)) '(make-move 1 2))
+;;           -> (make-pitchersInternalRep '(10 9) '(1 9))
+;; STRATEGY: structure decomposition on pits: PitchersInternalRep 
+(define (pitchers-after-moves pits mvlst)
+  (make-pitchersInternalRep 
+   (pitchersInternalRep-capacitylst pits)
+   (status-after-move 
+    (pitchersInternalRep-capacitylst pits) 
+    (pitchersInternalRep-status pits)
+    mvlst)))
+
+;; status-after-move: NELOPI NELONI Plan -> NELONI
+;; GIVEN: a list of PosInts and list of NonNegInts and a plan
+;; WHERE: 1)the first list of PosInts is the pitchers's capacities
+;;        2)the second list of NonNegInts is the pitcher's current
+;;     amount of contents
+;;        3) a plan(list of moves)
+;; RETURNS: the status of the given pitchers after executing the given plan
+;; EXAMPLES: (status-after-move '(10 7) '(10 0) (list (make-move 1 2)))
+;;               -> '(3 7)
+;; STRATEGY: structure decomposition on mv: Move
+(define (status-after-move pits sta mvlst)
+  (foldl
+   ;; Move NELONI -> NELONI
+   ;; GIVEN: a operation and a status of the pitchers
+   ;; RETURNS: the status of the pitchers after the given operation
+   (lambda (mv ans)
+     (water-pour-get-info pits ans (move-src mv) (move-tgt mv)))
+   sta
+   mvlst))
+
+;; water-pour-get-info: NELOPI NELONI PosInt PosInt -> NELONI
+;; GIVEN: a list of PosInts and list of NonNegInts and two PosInts
+;; WHERE: 1)the first list of PosInts is the pitchers's capacities
+;;        2)the second list of NonNegInts is the pitcher's current
+;;     amount of contents
+;;        3)the src is the pitcher to pour contents out
+;;        4)the tgt is the pitcher to pour contents in
+;; RETURNS: the status of the pitchers after pour contents from pitcher src to 
+;;       pitcher tgt
+;; EXAMPLES: (water-pour-get-info '(10 9) '(10 0) 1 2) -> '(3 7)
+;; STRATEGY: function composition
+(define (water-pour-get-info pitcaps pitstas src tgt)
+  (if (and (<= src (length pitcaps)) (<= tgt (length pitcaps)))
+      (water-pour-to-pits
+       (list-ref pitcaps (- tgt 1))
+       (list-ref pitstas (- src 1))
+       (list-ref pitstas (- tgt 1))
+       pitstas
+       src tgt)
+      empty))
+
+;; water-pour-to-pits: PosInt PosInt PosInt NELONI PosInt PosInt -> NELONI
+;; GIVEN: 1)tc is the target pitcher's capacity
+;;        2)ss is the source pitcher's current status(amount of contents)
+;;        3)ts is the target pitcher's current status(amount of contents)
+;;        4)pitstas is a status (list of current amount of 
+;;          contents in some given pitchers)
+;;        5)src refers to the source pitcher in some list of pitchers
+;;        6)tgt refers to the target pitcher in some list of pitchers
+;; RETURNS: the status of the list of pitchers after pouring the contents in
+;;     the given pitcher to the target pitcher
+;; EXAMPLES: (water-pour-to-pits 7 10 0 '(10 0) 1 2) -> '(3 7)
+;; STRATEGY: HOFC
+(define (water-pour-to-pits tc ss ts pitstas src tgt)
+  (reverse
+   (foldl
+    ;; PosInt NELONI -> NELONI
+    ;; GIVEN: a pitcher's current amount of contents, and a list of pitchers'
+    ;;     status already processed
+    ;; RETURNS: iff the given pitcher is the src then pour its contents out
+    ;;     according to the target pitcher's capacity and its current amount
+    ;;     of contents else iff the given pitcher is the target pitcher, 
+    ;;     receive the contents from the src pitcher, else just put the  
+    ;;     pitcher's status to the head of the given list.
+    (lambda (ps ans)
+      (cond
+        [(= (length ans) (- src 1)) (cons (src-pour ss tc ts) ans)]
+        [(= (length ans) (- tgt 1)) (cons (tgt-recieve ss tc ts) ans)]
+        [else (cons ps ans)]))
+    empty
+    pitstas)))
+
+;; src-pour: PosInt PosInt PosInt -> PosInt
+;; WHERE: 1)ss the source pitcher's status(amount of contents)
+;;        2)tc is the target pitcher's capacity
+;;        3)ts is the target pitcher status
+;; RETURNS: the source pitcher's status after pouring contents to the target
+;;     position
+;; EXAMPLES: (src-pour 10 7 0) -> 3
+;; STRATEGY: function composition
+(define (src-pour ss tc ts)
+  (if (< (+ ss ts) tc)
+      0
+      (- (+ ts ss) tc)))
+
+
+;; tgt-recieve: PosInt PosInt PosInt -> PosInt
+;; WHERE: 1)ss is the source pitcher's status(amount of contents)
+;;        2)tc is the target pitcher's capacity
+;;        3)ts is the target pitcher's status
+;; RETURNS: the target's status after pouring contents in
+;; EXAMPLES: (tgt-recieve 10 7 3) -> 7
+;; STRATEGY: function composition
+(define (tgt-recieve ss tc ts)
+  (if (> (+ ss ts) tc)
+      tc
+      (+ ss ts)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; findmove: NELOPI PosInt LOC LOC -> LOC
+;; WHERE: 1)pitcapalst is the capacities of some set of pitchers
+;;        2)goal is the amount of contents needed in one of the pitchers
+;;        3)clst is the changes of the previous operations
+;;        4)new-clst is the new changes generated from operating on the 
+;;     new-clst in last findmove
+;; RETURNS: a list of changes from the original status to the final status:
+;;     any pitcher having amount of given goal contents or empty iff it's 
+;;     impossible to get one pitcher having that amount of contents
+;; HALTING MESURE: the number of possible different kinds of pitchers's status 
+;;      have NOT appeared in the new-clst
+;; TERMINATION ARGUMENT: the number of different status of pitchers is limited
+;;     every time we will discover new status and add them in clst
+;; EXAMPLES: (findmove '(10 7) 3 '((10 7) () (10 0))) -> '((make-move 1 2))
+;; STRATEGY: general recursion
+(define (findmove pitcapalst goal clst new-clst)
+  (local
+    ((define all-clst (my-set-union clst new-clst)))
+    (cond
+      [(exists-in-status? goal clst) clst]
+      [(empty? new-clst) empty]
+      [else (findmove
+             pitcapalst goal all-clst
+             (water-pour pitcapalst all-clst new-clst))])))
+
+;; water-pour: NELOPI LOC LOC -> LOC
+;; GIVEN: 1)pitcapalst is the list of capacities of some given pitchers
+;;        2)clst is the changes of the previous operations
+;;        3)new-clst is the new changes generated from operating on the
+;; RETURNS: new status of the pitchers after excuting operations on the 
+;;      status appears as the third part of one of the changes in the given
+;;      new-clst
+;; EXAMPLES: (water-pour '(10 7) '(((10 0) () (10 0))) '(((10 0) () (10 0))))
+;;             -> (list (list (list 10 0) (make-move 1 2) (list 3 7)))
+;; STRATEGY: structure decomposition on ps : Change
+(define (water-pour pitcapalst clst new-clst)
+  (foldr
+   ;; Change LOC -> LOC
+   ;; GIVEN: a change and a list of changes
+   ;; RETURNS: all the new changes can be generated from the result status 
+   ;;     of the given changes
+   (lambda (ps ans)
+     (my-set-union
+      (pour-every-possible pitcapalst (my-set-union ans clst) (third ps) 1 1)
+      ans))
+   empty 
+   new-clst))
+
+;; new-operation-to-list: Move NELONI NELONI -> Change
+;; WHERE: 1) a move 
+;;        2)s-before is the status of the pitchers before excuting the given
+;;     operation
+;;        3)s-now is the status of the pitchers after executing the given
+;;     operation
+;; RETURNS: a change using the given information 
+;; EXAMPLES: (new-operation-to-list 
+;;             (make-move 1 2) '(10 0) '(3 7)) ->
+;;           (list (list 10 0) (make-move 1 2) (list 3 7)) 
+;; STRATEGY: function composition
+(define (new-operation-to-list op s-before s-now)
+  (list s-before op s-now))
+
+;; pour-every-possible: NELOPI LOC NELONI PosInt PosInt -> LOC
+;; GIVEN: 1)pitcapalst is the list of capacities of some given pitchers
+;;        2)clst is the changes of the previous operations
+;;        3)s-now is the status of the pitchers after executing the given
+;;     operation
+;;        4)src refers to the source position pitcher in the list of pitchers
+;;        5)tgt refers to the target position pitcher in the list of pitchers
+;; RETURNS: a list of new changes after excuting (make-move i j), in which
+;;     (tgt<=j<=(length pitcapalst) and i=src) or 
+;;     (1<=j<=(length pitcapalst and  i>src), and of cource i != j
+;; HALTING MESURE: (length pitcapalst) - (src - 1), src refers to the position 
+;;        of the given pitcher in the original list of pitchers
+;; TERMINATION ARGUMENT: different kinds of pour operations between pitchers
+;;     are limited, every time the number of undiscovered status decreases
+;; EXAMPLES: (pour-every-possible 
+;;             '(10 7) '(((10 0) () (10 0)))
+;;             '(10 0) 1 2)
+;;           -> (list (list (list 10 0) (make-move 1 2) (list 3 7)))
+;; STRATEGY: general recursion
+(define (pour-every-possible pitcapalst clst s-now src tgt)
+  (local 
+    ((define next-status (water-pour-get-info pitcapalst s-now src tgt))
+     (define new-mv-after-pour-from-src-to-tgt
+       (new-operation-to-list (make-move src tgt) s-now next-status)))
+    (cond
+      [(> src (length pitcapalst)) empty]
+      [(> tgt (length pitcapalst)) 
+       (pour-every-possible pitcapalst clst s-now (+ src 1) 1)]
+      [(or (= src tgt) (exists-before? next-status clst))
+       (pour-every-possible pitcapalst clst s-now src (+ tgt 1))]
+      [else 
+       (cons
+        new-mv-after-pour-from-src-to-tgt 
+        (pour-every-possible pitcapalst clst s-now src (+ tgt 1)))])))
+
+;; exists-in-status?: PosInt LOC -> Boolean
+;; WHERE: 1)goal is the amount of contents needed in one of the pitchers
+;;        2)clst is the list of changes generated in the operations
+;; RETURNS: true iff the goal has appeared in one of the result of the changes
+;; EXAMPLES: (exists-in-status? 10 '(((10 0) () (10 0)))) -> true
+;; STRATEGY: structure decomposition on c : Change
+(define (exists-in-status? goal clst)
+  (ormap
+   ;; Change -> Boolean
+   ;; GIVEN: a change
+   ;; RETURNS: true if the there's a pitcher in the change's result status 
+   ;;    that contains the given amount of contents
+   (lambda (c)
+     (check-status? goal (third c)))
+   clst))
+
+;; check-status?: PosInt NELONI -> Boolean
+;; WHERE: 1)goal is the amount of contents needed in one of the pitchers
+;;        2)status is the status of the pitchers now(amount of contents 
+;;          in them)
+;; RETURNS: true iff one of the pitchers having given amount of contents
+;; EXAMPLES: (check-status? 5 '(10 5)) -> true
+;; STRATEGY: HOFC
+(define (check-status? goal status)
+  (ormap
+   ;; PosInt -> Boolean
+   ;; GIVEN: a pitcher's status(amount of contents in it)
+   ;; RETURNS: true iff the pitcher contains given amount of contents
+   (lambda (s)
+     (equal? goal s))
+   status))
+
+;; exists-before: NELONI LOC -> Boolean
+;; WHERE: 1)ps the status of the pitchers
+;;        2)clst is the changes generated by previous operations
+;; RETURNS: true iff there's one change's result is the given status
+;; EXAMPLES: (exists-before? '(10 0) '(((10 0) () (10 0)))) -> #t
+;; STRATEGY: structure decomposition on c : Change
+(define (exists-before? ps clst)
+  (ormap
+   ;; Change -> Boolean
+   ;; GIVEN: a change
+   ;; RETURNS: true iff the given change's result status equals the given
+   ;;     status
+   (lambda (c)
+     (equal? (third c) ps))
+   clst))
+
+;; get-goal-pitcher-from-clst: PosInt LOC -> Change
+;; WHERE: 1)goal is the amount of the contents needed in one of the pitchers
+;;        2)clst is the changes generated by previous operations
+;; RETURNS: one of the changes 
+;; EXAMPLES: (get-goal-pitcher-from-clst 0 '(((10 0) () (10 0))) ->
+;;               '((10 0) () (10 0))
+;; STRATEGY: structure decomposition on change-having-goal : Change
+(define (get-goal-pitcher-from-clst goal clst)
+  (local
+    ((define change-having-goal
+       (filter
+        ;; Change -> Boolean
+        ;; GIVEN: a change
+        ;; RETURNS: true iff the there's a pitcher in the change's result 
+        ;;     status that contains the given amount of contents
+        ;; STRATEGY: structure decomposition on c : Change
+        (lambda (c)
+          (check-status? goal (third c)))
+        clst)))
+    (cond
+      [(empty? change-having-goal) empty]
+      [else (first change-having-goal)])))
+
+;; get-result-from-change: Change -> NELONI
+;; GIVEN: a change
+;; RETURNS: the result of the move: the third part of the move
+;; EXAMPLES: (get-result-from-change '(((10 0) () (10 0))) -> '(10 0)
+;; STRATEGY: structure decomposition on c : Change
+(define (get-result-from-change c)
+  (third c))
+
+;; move-from-list: NELONI LOC -> Change
+;; WHERE: 1)status is the status of the pitchers
+;;        2)clst is the changes generated by previous operations
+;; RETURNS: a change in the given list whose result is given status
+;; EXAMPLES: (move-from-list '(10 0) '(((10 0) () (10 0)))) 
+;;             -> '((10 0) () (10 0))
+;; STRATEGY: structure decomposition on filter-status : LOC
+(define (move-from-list status clst)
+  (local
+    ((define filter-status
+       (filter
+        ;; Change -> Boolean
+        ;; GIVEN: a change
+        ;; RETURNS: true iff the given change's result status equals the 
+        ;;    given status
+        ;; STATEGY: structure decomposition on c : Change
+        (lambda (c)
+          (equal? (third c) status))
+        clst)))
+    (cond
+      [(empty? filter-status) empty]
+      [else (first filter-status)])))
+
+;; plan-from-list: NELONI NELONI LOC Plan -> Plan
+;; GIVEN:
+;; 1)the ini-status is the start status of the pitchers
+;; 2)the now-s is the current status of the pitchers
+;; 3)clst is the changes generated by previous operations
+;; 4)plan is a list of moves that can change the current status to the
+;;   target status(one of the pitchers containing the needed 
+;;   amount of contents)
+;; WHERE: ini-status and now-s are present in main 
+;;        clst(list returned from findmove) 
+;; RETURNS: a plan that can change the ini-status to the target status
+;; HALTING MEASURE: the halting measure is the number of the operations
+;;     needed from the ini-status to the target status(which contains goal)
+;; TERMINATION ARGUMENT: when now-s = ini-status return the plan found
+;;                       (since now-s and ini-status are both present in
+;;                        main clst, condition will satisfy for sure and
+;;                        function will return)
+;; EXAMPLES: (plan-from-list 
+;;               '(10 0) '(3 7) 
+;;               '(((10 0) () (10 0)) ((10 0) (make-move 1 2) (3 7))) empty)
+;;           -> '((make-move 1 2))
+;; STRATEGY: general recursion
+(define (plan-from-list ini-status now-s clst plan)
+  (if (equal? now-s ini-status)
+      plan
+      (plan-from-list 
+       ini-status 
+       (first (move-from-list now-s clst))
+       clst
+       (cons (second (move-from-list now-s clst)) plan))))
+
+;; ini-status-generate: NELOPI -> NELONI
+;; WHERE: 1)pitcapalst is the list of capacities of some given pitchers
+;; RETURNS: a status of the pitchers which just fill the first pitcher and
+;;     leave all the other pitchers empty
+;; EXAMPLES: (ini-status-generate '(10 7)) -> '(10 0)
+;; STRATEGY: structure decomposition on pitcapalst : NELOPI
+(define (ini-status-generate pitcapalst)
+  (cond
+    [(empty? pitcapalst) empty]
+    [else (cons (first pitcapalst) (make-list (- (length pitcapalst) 1) 0))]))
+
+;; initial-list: NELOPI -> Change
+;; WHERE: 1)pitcapalst is the list of capacities of some given pitchers
+;; RETURNS: a change that having an empty operation having no effect on the
+;;     initial status of the pitchers
+;; EXAMPLES: (initial-list '(10 9)) -> '(((10 0) () (10 0)))
+;; STRATEGY: function composition
+(define (initial-list pitcapalst)
+  (list
+   (list 
+    (ini-status-generate pitcapalst) '() (ini-status-generate pitcapalst))))
+
+;; solution: NELOPI PosInt -> MaybePlan
+;; WHERE: 1)pitcapalst is the list of capacities of some given pitchers
+;;        2)the goal is the contents needed in one of the pitchers
+;; RETURNS: a sequence of moves which, when executed from left to right,
+;; results in one pitcher (not necessarily the first pitcher) containing
+;; the goal amount.  Returns false if no such sequence exists.
+;; EXAMPLES: (solution '(10 9) 1) -> '((make-move 1 2))
+;; STRATEGY: function composition
+(define (solution pitcapalst goal)
+  (local
+    ((define movelist 
+       (findmove 
+        pitcapalst goal (initial-list pitcapalst) (initial-list pitcapalst))))
+    (if (empty? movelist) 
+        false
+        (plan-from-list 
+         (ini-status-generate pitcapalst)
+         (get-result-from-change
+          (get-goal-pitcher-from-clst goal movelist)) 
+         movelist
+         empty))))
+
+;; my-set-union: LOC LOC -> LOC
+;; GIVEN: two lists of changes
+;; RETURNS: s1 unions s2 by their member's result status
+;; EXAMPLES: (my-set-union 
+;;             '(((10 0 0) () (10 0 0)) ((10 0 0) (make-move 1 2) (3 7 0)))
+;;             '(((10 0 0) () (10 0 0))))
+;;             -> '(((10 0 0) () (10 0 0)) ((10 0 0) (make-move 1 2) (3 7 0)))
+;; STRATEGY: structure decomposition on c : Change
+(define (my-set-union s1 s2)
+  (foldr
+   ;; Change LOC -> LOC
+   ;; GIVEN: a change and a list of changes
+   ;; RETURNS: iff the result status in the given change have NOT appeared as 
+   ;;     a result status in the given list of changes, add it to the given
+   ;;     list, or just return the given list
+   (lambda (c ans)
+     (if (exists-before? (third c) s2)
+         ans
+         (cons c ans)))
+   s2
+   s1)) 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; TESTS
+
+(begin-for-test
+  (check-equal? (list-to-pitchers pitchers-external-example1)
+                pitchersInternalRep-example1
+                "should transform to pitchersInternalRep")
+  (check-equal? (pitchers-to-list pitchersInternalRep-example1)
+                pitchers-external-example1
+                "should transform to external-rep")
+  (check-equal? (pitchers-after-moves pitchersInternalRep-example1 
+                                      plan-example1)
+                pitchersInternalRep-example2
+                "should change from the start status to target")
+  (check-equal? (solution pitchers-example1 5)
+                plan-example1
+                "should give a plan")
+  (check-equal? (solution pitchers-example1 50)
+                false
+                "should give a false")
+  (check-equal? (get-goal-pitcher-from-clst 50 loc-example1)
+                empty
+                "should give an empty")
+  (check-equal? (solution '(3 6 9) 2)
+                false
+                "should give a false")
+  (check-equal? (move-from-list '(10 0 0 0) loc-example1)
+                empty
+                "should give an empty")
+  (check-equal? (solution empty 5)
+                false
+                "should give a false")
+  (check-equal? (solution '(8 5 3) 4)
+                (list (make-move 1 2)
+                      (make-move 2 3) 
+                      (make-move 3 1)
+                      (make-move 2 3)
+                      (make-move 1 2) 
+                      (make-move 2 3))
+                "should return a plan")
+  (check-equal? (pitchers-to-list
+                 (pitchers-after-moves
+                  (list-to-pitchers 
+                   '((8 8) (5 0) (3 0)))
+                  (solution '(8 5 3) 4)))
+                (list (list 8 1) (list 5 4) (list 3 3))
+                "getting output for solution in external represtation"))
+
+
+
+
+

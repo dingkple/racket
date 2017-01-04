@@ -1,0 +1,66 @@
+Date   Who          Start  Stop    Interruptions  Question   TimeOnTask                 Comments
+11/04  ZKD          16:30  16:31       0              1           1               just the basic framework
+11/04  ZKD          20:25  22:26       0	      2           121	          add more docs to q 2
+
+============committing to git: 11/04 22:30 ================================================================
+
+11/04  ZKD	    22:30  22:35       0              2           5               datadefs commit for q1 and q2
+
+11/05  SM,ZKD       09:00  11:30      20              1           130             logic & coding of q1
+
+============committing to git: 11/05 11:31 ================================================================
+
+11/05  ZKD	    11:31   11:35      0              1           4               working code for q1
+11/05  SM,ZKD	    13:15   13:50      0              1           35		  testcases and testing of q1
+11/05  SM,ZKD       14:00   17:30     15              2           195             logic for q2 and datadefs and started coding for q2
+
+============committing to git: 11/05 17:30 ================================================================
+
+11/05  ZKD	    17:35  17:40       0             2            5               committing pitchers.rkt with q2 functions written
+
+
+11/06  SM,ZKD	    09:10   11:50     20             2            140		  coding of q2 continued and working on solution function
+11/06  SM,ZKD       12:30   15:10     10             2            150             testcases and testing of q2
+
+============committing to git: 11/06 15:15 ================================================================
+
+11/06  ZKD	    15:15  15:20       0              2           5               committing pitchers.rkt solution function working
+
+11/06  ZKD	    17:15   19:56     25              3           136		  datadefs for q3 and coding
+
+============committing to git: 11/06 19:57 ================================================================
+
+11/06  ZKD	    19:57  20:03       0              3           5               committing river.rkt
+
+11/07  SM,ZKD	    12:10   15:50     30              3           200		  logic and coding of q3 solution function
+11/07  SM,ZKD       16:30   18:45     10              3           125             testcases and testing of q3
+
+============committing to git: 11/07 18:46 ================================================================
+
+11/07  ZKD	    18:46  18:52       0              3           5               committing river.rkt
+
+11/08  SM	    11:10   13:25     15              3           120		   review of q1, q2 and q3
+
+============committing to git: 11/08 13:26 ================================================================
+
+11/08  SM           13:26  13:42       0              3           5               committing after review
+
+11/08  ZKD          18:10   19:00      0              3           50		  changes for intitial state for solution function
+
+============committing to git: 11/08 19:01 ================================================================
+
+11/08  ZKD	    19:01  19:05       0              3           4               committing river.rkt
+
+11/10  SM,ZKD       09:26   13:42     30              3           216             river.rkt changes in logic as it was not passing qualification
+
+============committing to git: 11/10 13:50 ================================================================
+
+11/10  ZKD	    13:50  13:55       0              3           5               committing river.rkt
+
+
+Total Time On Task Q1 (minutes)        170
+Total Time On Task Q2 (minutes)        626
+Total Time On Task Q3 (minutes)        847
+TOTQ1 (hours and tenths)   	       2.8
+TOTQ2 (hours and tenths)               10.4
+TOTQ3 (hours and tenths)               14.1     
