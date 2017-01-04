@@ -1,0 +1,17 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname |32|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
+(define (manht_distance p)
+  (+ (posn-x p) (posn-y p)))
+
+(define (sum_distance lst)
+  (cond
+    [(empty? lst) 0]
+    [else (+ (manht_distance (first lst)) (sum_distance (rest lst)))]
+    ))
+
+
+(sum_distance (list (make-posn 1 3)
+                    (make-posn 2 4)
+                    (make-posn 1 3)
+                    (make-posn 1 3)))

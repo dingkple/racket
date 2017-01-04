@@ -1,0 +1,44 @@
+Date		Who		Start		Stop		interruptions		Questions		TimeOnTask		comment		
+9/15		ZkD		11:29		11:50		0					1				21				have a look at the question and write a skeleton	
+9/15		ZkD		21:05		21:30		0					3				25				read and try to write something	
+9/16		ZkD		11:11		13:48		0					4				37				write skeleton
+9/16		ZkD		12:12		12:29		0					3				17				just skeleton	
+============commiting to git: 9/16 13:51 ===================
+9/17		ZkD		9:54		10:51		0					1				57				correct some mistakes and finish the contracts, examples and so on
+9/17		ZkD		11:45		11:57		0					1				12				add tests	
+============commiting to git: 9/17 11:58 ===================
+9/17		ZkD		12:07		12:18		0					1				11				add more tests to cover all situations
+9/17		ZkD		12:21		13:14		0					3				53				working on snack, too tired...take a break and read some probs on piazza 
+9/17		ZkD		13:20		13:41		5					3				21				still snack
+9/17		ZkD		13:41		13:48		0					3				7				finished snack 
+9/17		ZkD		13:48		14:25		0					2				37				finished editor 
+9/17		ZkD		14:25		14:59		0					4				34				HYY came and bring my lunch...finished regexp, nothing hard~
+9/17		ZkD		15:05		17:30		5					1				145				wrongly understood q 1, when the ball is outside the room, it can go anywhere 
+9/17		ZkD		19:40		19:58		0					1				18				finishing the last part, suppose to be done...hope no mistakes 
+============commiting to git: 9/17 19:59 ===================
+9/18		ZkD		21:32		21:34		0					3				2				changed the names of the arguement: machine-chocolates, machine-carrots 
+============commiting to git: 9/18 21:34 ===================
+9/19		ZkD		18:49		18:55		0					1				6				add constant names 
+============commiting to git: 9/19 18:55 ===================
+9/19		ZkD		18:55		19:12		0					4				17				add kyeEvent 
+9/19		ZkD		19:12		19:14		0					4				2				add keyEvent 
+9/19		ZkD		19:15		19:25		0					3				10				wrongly understood the question about buying, once get the food, change are returned 
+============commiting to git: 9/19 19:26 ===================
+9/22		ZkD		10:00		10:28		0					1				28				change radius of robot ot constant 
+============commiting to git: 9/22 10:29 ===================
+9/22		ZkD		10:30		10:45		0					2				15				change some name of funcs 
+9/22		ZkD		10:45		11:00		0					3				15				reviewed the comments 
+9/22		ZkD		11:00		11:29		0					4				29				fixed some minor mistakes 
+============commiting to git: 9/22 11:30 ===================
+9/22		ZkD		13:32		13:36		0					4				4				fix problems when input more under state:end 
+============commiting to git: 9/22 13:36 ===================
+9/22		ZkD		16:25		16:32		0					1				7				minor changes 
+============commiting to git: 9/22 16:32 ===================
+Total Time On Task Q1 (minutes)			305
+Total Time On Task Q2 (minutes)			52
+Total Time On Task Q3 (minutes)			150
+Total Time On Task Q4 (minutes)			123
+TOTQ1(hours and tenths): 5.083
+TOTQ2(hours and tenths): 0.866
+TOTQ3(hours and tenths): 2.5
+TOTQ4(hours and tenths): 2.05

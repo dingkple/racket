@@ -1,0 +1,713 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname 03-3-two-draggable-cats) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
+;; two draggable cats.
+;; like draggable cat, but there are TWO cats.  They are individually
+;; draggable.  But space pauses or unpauses the entire system.
+
+;; draggable cat.
+;; like falling cat, but user can drag the cat with the mouse.
+;; button-down to select, drag to move, button-up to release.
+
+;; falling cat.  
+;; A cat falls from the top of the scene.
+;; The user can pause/unpause the cat with the space bar.
+
+;; start with (main 0)
+
+(require rackunit)
+(require "extras.rkt")
+(require 2htdp/universe)
+(require 2htdp/image)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; MAIN FUNCTION.
+
+;; main : Number -> World
+;; GIVEN: the initial y-position of the cats
+;; EFFECT: runs the simulation, starting with the cats falling
+;; RETURNS: the final state of the world
+(define (main initial-pos)
+  (big-bang (initial-world initial-pos)
+            (on-tick world-after-tick 0.5)
+            (on-draw world-to-scene)
+            (on-key world-after-key-event)
+            (on-mouse world-after-mouse-event)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; CONSTANTS
+
+(define CAT-IMAGE (bitmap "cat.png"))
+
+;; how fast the cat falls, in pixels/tick
+(define CATSPEED 8)
+
+;; dimensions of the canvas
+(define CANVAS-WIDTH 450)
+(define CANVAS-HEIGHT 400)
+(define EMPTY-CANVAS (empty-scene CANVAS-WIDTH CANVAS-HEIGHT))
+(define CAT1-X-COORD (/ CANVAS-WIDTH 3))
+(define CAT2-X-COORD (* 2 CAT1-X-COORD))
+
+;; dimensions of the cat
+(define HALF-CAT-WIDTH  (/ (+ (image-width  CAT-IMAGE) 4) 2))
+(define HALF-CAT-HEIGHT (/ (+ (image-height CAT-IMAGE) 4) 2))
+
+(define NORTH 1)
+(define EAST 2)
+(define SOUTH -1)
+(define WEST -2)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;; DATA DEFINITIONS
+
+(define-struct world (cat1 cat2 paused?))
+;; A World is a (make-world Cat Cat Boolean)
+;; cat1 and cat2 are the two cats
+;; paused? describes whether or not the world is paused
+
+;; template:
+;; world-fn : World -> ??
+;; (define (world-fn w)
+;;   (... (world-cat1 w) (world-cat2 w) (world-paused? w)))
+
+
+(define-struct cat (x-pos y-pos selected? direction))
+;; A Cat is a (make-cat Number Number Boolean)
+;; Interpretation: 
+;; x-pos, y-pos give the position of the cat. 
+;; selected? describes whether or not the cat is selected.
+
+;; template:
+;; cat-fn : Cat -> ??
+;(define (cat-fn c)
+; (... (cat-x-pos w) (cat-y-pos w) (cat-selected? w)))
+
+;; examples of cats, for testing
+(define selected-cat1-at-20 (make-cat CAT1-X-COORD 20 true SOUTH))
+(define unselected-cat1-at-20 (make-cat CAT1-X-COORD 20 false SOUTH))
+
+(define selected-cat1-at-28 (make-cat CAT1-X-COORD 28 true SOUTH))
+(define unselected-cat1-at-28 (make-cat CAT1-X-COORD 28 false SOUTH))
+
+(define selected-cat2-at-35 (make-cat CAT2-X-COORD 35 true SOUTH))
+(define unselected-cat2-at-35 (make-cat CAT2-X-COORD 35 false SOUTH))
+
+;; examples of worlds, for testing
+
+(define paused-world-at-20
+  (make-world
+   unselected-cat1-at-20
+   selected-cat2-at-35
+   true))
+
+(define unpaused-world-at-20
+  (make-world
+   unselected-cat1-at-20
+   selected-cat2-at-35
+   false))
+
+;; in an unpaused world, the unselected cat falls, but the selected
+;; cat stays pinned to the mouse.
+(define unpaused-world-at-20-after-tick
+  (make-world
+   unselected-cat1-at-28
+   selected-cat2-at-35
+   false))
+
+
+;; examples KeyEvents for testing
+(define pause-key-event " ")
+(define non-pause-key-event "q")   
+
+
+;; example MouseEvents for testing:
+(define button-down-event "button-down")
+(define drag-event "drag")
+(define button-up-event "button-up")
+(define other-event "enter")
+
+;;; END DATA DEFINITIONS
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; world-after-tick : World -> World
+;; GIVEN: a world w
+;; RETURNS: the world that should follow w after a tick.
+;; STRATEGY: structural decomposition on w : World
+(define (world-after-tick w)
+  (if (world-paused? w)
+      w
+      (make-world
+       (cat-after-tick (world-cat1 w))
+       (cat-after-tick (world-cat2 w))
+       (world-paused? w))))
+
+
+
+;; cat-after-tick : Cat -> Cat
+;; GIVEN: a cat c
+;; RETURNS: the state of the given cat after a tick if it were in an
+;; unpaused world.
+
+;; examples: 
+;; cat selected
+;; (cat-after-tick selected-cat1-at-20) = selected-cat1-at-20
+;; cat paused:
+;; (cat-after-tick unselected-cat1-at-20) = unselected-cat-at-28
+
+;; STRATEGY: structural decomposition on c : Cat
+
+(define (cat-after-tick c)
+  (cat-after-tick-helper (cat-x-pos c) (cat-y-pos c) (cat-selected? c) (cat-direction c)))
+
+;; tests: tests follow help function.
+
+;; cat-after-tick-helper : Number Number Boolean -> Cat
+;; GIVEN: a position and a value for selected?
+;; RETURNS: the cat that should follow one in the given position in an
+;; unpaused world 
+;; STRATEGY: function composition
+(define (cat-after-tick-helper x-pos y-pos selected? direction)
+  (if selected?
+      (make-cat x-pos y-pos selected? direction)
+      (cond
+        ; [(or (cat-x-not-in-canvas? x-pos) (cat-y-not-in-canvas? y-pos)) (put-back-cat x-pos y-pos direction)]
+        [(= direction NORTH) (move-cat-north x-pos y-pos)]
+        [(= direction EAST) (move-cat-east x-pos y-pos)]
+        [(= direction SOUTH) (move-cat-south x-pos y-pos)]
+        [(= direction WEST) (move-cat-west x-pos y-pos)]
+        )))
+
+; get-cat-x-pos: NonNegInt -> world
+; GIVEN: the cat's current x-pos
+; RETURNS: the cat's adjusted x-pos
+; EXAMPLE: see tests below
+; STRATEGY: function composition
+(define (get-cat-x-pos x-pos)
+  (if (< x-pos HALF-CAT-WIDTH)
+      HALF-CAT-WIDTH
+      (- CANVAS-WIDTH HALF-CAT-WIDTH)
+      ))
+
+(define (get-cat-y-pos y-pos)
+  (if (< y-pos HALF-CAT-HEIGHT)
+      HALF-CAT-HEIGHT
+      (- CANVAS-HEIGHT HALF-CAT-HEIGHT)
+      ))
+
+; put-back-cat: NonNegInt NonNegInt direction -> cat
+; GIVEN: the cat's current x-pos and y-pos, and direction
+; RETURNS: a cat with its position adjusted
+; EXAMPLE: see tests below
+; STRATEGY: function composition
+(define (put-back-cat x-pos y-pos direction)
+  (if (cat-x-not-in-canvas? x-pos)
+      (if (cat-y-not-in-canvas? y-pos)
+          (make-cat (get-cat-x-pos x-pos) (get-cat-y-pos y-pos) false direction)
+          (make-cat (get-cat-x-pos x-pos) y-pos false direction)
+          )
+      (if (cat-y-not-in-canvas? y-pos)
+          (make-cat x-pos (get-cat-y-pos y-pos) false direction)
+          (make-cat x-pos y-pos false direction)
+          )))
+
+
+; cat-x-not-in-canvas: NonNegInt -> Boolean
+; GIVEN: cat's x-pos
+; RETURNS: #t iff the cat's x-pos is not in the canvas
+; EXAMPLE: see tests below
+; STRATEGY: function composition
+(define (cat-x-not-in-canvas? x-pos)
+  (or (< x-pos HALF-CAT-WIDTH) (> x-pos (- CANVAS-WIDTH HALF-CAT-WIDTH))))
+
+(define (cat-y-not-in-canvas? y-pos)
+  (or (< y-pos HALF-CAT-HEIGHT) (> y-pos (- CANVAS-HEIGHT HALF-CAT-HEIGHT))))
+
+
+
+
+; move-cat-north: NonNegInt NonNegInt -> cat
+; GIVEN: cat's x-pos and y-pos
+; RETURNS: a cat after moving
+; EXAMPLE: see tests below
+; STRATEGY: function composition
+(define (move-cat-north x-pos y-pos)
+  (if (<= (- y-pos CATSPEED) HALF-CAT-HEIGHT)
+      (make-cat x-pos
+                HALF-CAT-HEIGHT
+                false
+                SOUTH)
+      (make-cat x-pos
+                (- y-pos CATSPEED)
+                false
+                NORTH)))
+
+(define (move-cat-south x-pos y-pos)
+  (if (>= (+ y-pos CATSPEED) (- CANVAS-HEIGHT HALF-CAT-HEIGHT))
+      (make-cat x-pos
+                (- CANVAS-HEIGHT HALF-CAT-HEIGHT)
+                false
+                NORTH)
+      (make-cat x-pos
+                (+ y-pos CATSPEED)
+                false
+                SOUTH)))
+
+(define (move-cat-east x-pos y-pos)
+  (if (>= (+ x-pos CATSPEED) (- CANVAS-WIDTH HALF-CAT-WIDTH))
+      (make-cat (- CANVAS-WIDTH HALF-CAT-WIDTH)
+                y-pos
+                false
+                WEST)
+      (make-cat (+ x-pos CATSPEED)
+                y-pos
+                false
+                EAST)))
+
+(define (move-cat-west x-pos y-pos)
+  (if (<= (- x-pos CATSPEED) HALF-CAT-WIDTH)
+      (make-cat HALF-CAT-WIDTH
+                y-pos
+                false
+                EAST)
+      (make-cat (- x-pos CATSPEED)
+                y-pos
+                false
+                WEST)))
+
+
+
+;; tests:
+(begin-for-test
+  ;; cat selected
+  (check-equal?
+   (cat-after-tick selected-cat1-at-20)
+   selected-cat1-at-20
+   "selected cat shouldn't move")
+  
+  ; cat unselected
+  (check-equal? 
+   (cat-after-tick unselected-cat1-at-20)
+   unselected-cat1-at-28
+   "unselected cat should fall CATSPEED pixels and remain unselected")
+  
+  )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; world-to-scene : World -> Scene
+;; RETURNS: a Scene that portrays the given world.
+;; EXAMPLE: (world-to-scene paused-world-at-20) should return a canvas with
+;; two cats, one at (150,20) and one at (300,28)
+;;          
+;; STRATEGY: structural decomposition w : World
+(define (world-to-scene w)
+  (place-cat
+   (world-cat1 w)
+   (place-cat
+    (world-cat2 w)
+    EMPTY-CANVAS)))
+
+(define image-of-paused-world-at-20
+  (place-image CAT-IMAGE 150 20
+               (place-image CAT-IMAGE 300 35
+                            EMPTY-CANVAS)))
+
+(begin-for-test
+  (check-equal?
+   (world-to-scene paused-world-at-20)
+   image-of-paused-world-at-20))
+
+;; place-cat : Cat Scene -> Scene
+;; RETURNS: a scene like the given one, but with the given cat painted
+;; on it.
+(define (place-cat c s)
+  (place-image
+   CAT-IMAGE
+   (cat-x-pos c) (cat-y-pos c)
+   s))
+
+;; tests
+
+;;; check this visually to make sure it's what you want
+(define image-at-20 (place-image CAT-IMAGE CAT1-X-COORD 20 EMPTY-CANVAS))
+
+;;; note: these only test whether world-to-scene calls place-image properly.
+;;; it doesn't check to see whether image-at-20 is the right image!
+(begin-for-test
+  (check-equal? 
+   (place-cat selected-cat1-at-20 EMPTY-CANVAS)
+   image-at-20
+   "(place-cat selected-cat1-at-20 EMPTY-CANVAS) returned unexpected image or value")
+  
+  (check-equal?
+   (place-cat unselected-cat1-at-20 EMPTY-CANVAS)   
+   image-at-20
+   "(place-cat unselected-ca1t-at-20 EMPTY-CANVAS) returned unexpected image or value"))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; world-after-key-event : World KeyEvent -> World
+;; GIVEN: a world w
+;; RETURNS: the world that should follow the given world
+;; after the given key event.
+;; on space, toggle paused?-- ignore all others
+;; EXAMPLES: see tests below
+;; STRATEGY: structural decomposition on kev : KeyEvent
+(define (world-after-key-event w kev)
+  (cond
+    [(key=? kev " ")
+     (world-with-paused-toggled w)]
+    [(key=? kev "left") (world-after-directionkey w WEST)]
+    [(key=? kev "right") (world-after-directionkey w EAST)]
+    [(key=? kev "up") (world-after-directionkey w NORTH)]
+    [(key=? kev "down") (world-after-directionkey w SOUTH)]
+    [else w]))
+
+
+(define (world-after-directionkey w direction)
+  (make-world
+   (change-cat-direaction (world-cat1 w) direction)
+   (change-cat-direaction (world-cat2 w) direction)
+   (world-paused? w)))
+
+(define (change-cat-direaction c d)
+  (if (cat-selected? c)
+      (make-cat (cat-x-pos c)
+                (cat-y-pos c)
+                (cat-selected? c)
+                d)
+      c))
+
+
+;; world-with-paused-toggled : World -> World
+;; RETURNS: a world just like the given one, but with paused? toggled
+;; STRATEGY: structural decomposition on w : World
+(define (world-with-paused-toggled w)
+  (make-world
+   (world-cat1 w)
+   (world-cat2 w)
+   (not (world-paused? w))))
+
+
+;; for world-after-key-event, we need 4 tests: a paused world, and an
+;; unpaused world, and a pause-key-event and a non-pause key event.
+
+(begin-for-test
+  (check-equal?
+   (world-after-key-event paused-world-at-20 pause-key-event)
+   unpaused-world-at-20
+   "after pause key, a paused world should become unpaused")
+  
+  (check-equal?
+   (world-after-key-event unpaused-world-at-20 pause-key-event)
+   paused-world-at-20
+   "after pause key, an unpaused world should become paused")
+  
+  (check-equal?
+   (world-after-key-event paused-world-at-20 non-pause-key-event)
+   paused-world-at-20
+   "after a non-pause key, a paused world should be unchanged")
+  
+  (check-equal?
+   (world-after-key-event unpaused-world-at-20 non-pause-key-event)
+   unpaused-world-at-20
+   "after a non-pause key, an unpaused world should be unchanged"))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; world-after-mouse-event : World Number Number MouseEvent -> World
+;; GIVEN: a world and a description of a mouse event
+;; RETURNS: the world that should follow the given mouse event
+(define (world-after-mouse-event w mx my mev)
+  (make-world
+   (cat-after-mouse-event (world-cat1 w) mx my mev)
+   (cat-after-mouse-event (world-cat2 w) mx my mev)
+   (world-paused? w)))
+
+
+
+;; cat-after-mouse-event : Cat Number Number MouseEvent -> Cat
+;; GIVEN: a cat and a description of a mouse event
+;; RETURNS: the cat that should follow the given mouse event
+;; examples:  See slide on life cycle of dragged cat
+;; strategy: struct decomp on mouse events
+(define (cat-after-mouse-event c mx my mev)
+  (cond
+    [(mouse=? mev "leave") (cat-after-leave c)]
+    [(mouse=? mev "button-down") (cat-after-button-down c mx my)]
+    [(mouse=? mev "drag") (cat-after-drag c mx my)]
+    [(mouse=? mev "button-up") (cat-after-button-up c mx my)]
+    [else c]))
+
+
+
+
+
+
+
+;; how many tests do we need here?
+;; 3 mouse events (+ a test for the else clause)
+;; cats selected or unselected  (do we need to worry about being
+;; paused?)
+;; event inside cat or not.
+
+(begin-for-test
+  
+  ;; button-down:
+  
+  ;; button-down inside cat1
+  (check-equal?
+   (world-after-mouse-event 
+    (make-world
+     unselected-cat1-at-20
+     unselected-cat2-at-35
+     false)
+    (+ CAT1-X-COORD 5) 15    ;; a coordinate inside cat1
+    "button-down")
+   (make-world
+    selected-cat1-at-20
+    unselected-cat2-at-35
+    false)
+   "button down inside cat1 should select it but didn't")
+  
+  
+  ;; button-down inside cat2
+  (check-equal?
+   (world-after-mouse-event 
+    (make-world
+     unselected-cat1-at-20
+     unselected-cat2-at-35
+     false)
+    (+ CAT2-X-COORD 5) 15    ;; a coordinate inside cat2
+    "button-down")
+   (make-world
+    unselected-cat1-at-20
+    selected-cat2-at-35
+    false)
+   "button down inside cat2 should select it but didn't")
+  
+  ;; button-down not inside any cat
+  (check-equal?
+   (world-after-mouse-event 
+    (make-world
+     unselected-cat1-at-20
+     unselected-cat2-at-35
+     false)
+    (+ CAT1-X-COORD 5) 115    ;; a coordinate not inside cat1 or cat2
+    "button-down")
+   (make-world
+    unselected-cat1-at-20
+    unselected-cat2-at-35
+    false)
+   "button down outside any cat should leave world unchanged, but didn't")
+  
+  ;; Question: is it possible to do a button-down on an
+  ;; already-selected cat?  Is it possible to do a button-down on a
+  ;; world in which ANY cat is selected?
+  
+  ;; tests for drag
+  
+  ;; don't care about paused, care only about which cat is selected. 
+  
+  ;; no cats selected: drag should not change anything
+  (check-equal?
+   (world-after-mouse-event
+    (make-world
+     unselected-cat1-at-20
+     unselected-cat2-at-35
+     false)
+    (+ CAT1-X-COORD 100) 15    ;; a large motion
+    "drag")
+   (make-world
+    unselected-cat1-at-20
+    unselected-cat2-at-35
+    false)
+   "drag with no cat selected didn't leave world unchanged")
+  
+  ;; cat1 selected
+  (check-equal?
+   (world-after-mouse-event
+    (make-world
+     selected-cat1-at-20
+     unselected-cat2-at-35
+     false)
+    (+ CAT1-X-COORD 100) 15    ;; a large motion
+    "drag")
+   (make-world
+    (make-cat (+ CAT1-X-COORD 100) 15 true SOUTH)
+    unselected-cat2-at-35
+    false)
+   "drag when cat1 is selected should just move cat1, but didn't")
+  
+  ;; cat2 selected
+  (check-equal?
+   (world-after-mouse-event
+    (make-world
+     unselected-cat2-at-35
+     selected-cat1-at-20
+     false)
+    (+ CAT1-X-COORD 100) 15    ;; a large motion
+    "drag")
+   (make-world
+    unselected-cat2-at-35
+    (make-cat (+ CAT1-X-COORD 100) 15 true SOUTH)
+    false)
+   "drag when cat2 is selected should just move cat2, but didn't")
+  
+  ;; Question: is it possible to have both cat1 and cat2 selected?  If
+  ;; so, what happens when they are both selected?
+  
+  ;; tests for button-up
+  
+  ;; button-up always unselects both cats
+  
+  ;; unselect cat1
+  (check-equal?
+   (world-after-mouse-event
+    (make-world
+     selected-cat2-at-35
+     unselected-cat1-at-20
+     true)
+    (+ CAT1-X-COORD 100) 15    ;; arbitrary location
+    "button-up")
+   (make-world
+    unselected-cat2-at-35
+    unselected-cat1-at-20
+    true)
+   "button-up failed to unselect cat1")
+  
+  
+  
+  ;; unselect cat2
+  (check-equal?
+   (world-after-mouse-event
+    (make-world
+     unselected-cat1-at-20
+     selected-cat2-at-35
+     true)
+    (+ CAT1-X-COORD 100) 15    ;; arbitrary location
+    "button-up")
+   (make-world
+    unselected-cat1-at-20
+    unselected-cat2-at-35
+    true)
+   "button-up failed to unselect cat2")
+  
+  ;; unselect cat2
+  (check-equal?
+   (world-after-mouse-event
+    (make-world
+     unselected-cat1-at-20
+     unselected-cat2-at-35
+     true)
+    (+ CAT1-X-COORD 100) 15    ;; arbitrary location
+    "button-up")
+   (make-world
+    unselected-cat1-at-20
+    unselected-cat2-at-35
+    true)
+   "button-up with two unselected cats failed.")
+  
+  
+  
+  
+  
+  ;; tests for other mouse events
+  
+  (check-equal?
+   (world-after-mouse-event unpaused-world-at-20 
+                            (+ CAT1-X-COORD 100) 15    ;; arbitrary coordinate
+                            "move")
+   unpaused-world-at-20
+   "other mouse events should leave the world unchanged, but didn't")
+  
+  )
+
+;; helper functions:
+
+;; cat-after-button-down : Cat Number Number -> Cat
+;; RETURNS: the cat following a button-down at the given location.
+;; STRATEGY: struct decomp on cat
+(define (cat-after-button-down c x y)
+  (if (in-cat? c x y)
+      (make-cat (cat-x-pos c) (cat-y-pos c) true (cat-direction c))
+      c))
+
+;; cat-after-drag : Cat Number Number -> Cat
+;; RETURNS: the cat following a drag at the given location
+;; STRATEGY: struct decomp on cat
+(define (cat-after-drag c x y)
+  (if (cat-selected? c)
+      (make-cat x y true (cat-direction c))
+      c))
+
+;; cat-after-button-up : Cat Number Number -> Cat
+;; RETURNS: the cat following a button-up at the given location
+;; STRATEGY: struct decomp on cat
+(define (cat-after-button-up c x y)
+  (if (cat-selected? c)
+      (make-cat (cat-x-pos c) (cat-y-pos c) false (cat-direction c))
+      c))
+
+; cat-after-leave: cat -> cat
+; RETURNS: the cat with its positon adjusted after the mouse leaves canvas
+; STRATEGY: structural decomposition [cat]
+(define (cat-after-leave c)
+  (if (cat-selected? c)
+      (if (or (cat-x-not-in-canvas? (cat-x-pos c)) (cat-y-not-in-canvas? (cat-y-pos c)))
+          (put-back-cat (cat-x-pos c) (cat-y-pos c) (cat-direction c))
+          c)
+      c))
+
+
+;; in-cat? : Cat Number Number -> Cat
+;; RETURNS true iff the given coordinate is inside the bounding box of
+;; the given cat.
+;; EXAMPLES: see tests below
+;; STRATEGY: structural decomposition on c : Cat
+(define (in-cat? c x y)
+  (and
+   (<= 
+    (- (cat-x-pos c) HALF-CAT-WIDTH)
+    x
+    (+ (cat-x-pos c) HALF-CAT-WIDTH))
+   (<= 
+    (- (cat-y-pos c) HALF-CAT-HEIGHT)
+    y
+    (+ (cat-y-pos c) HALF-CAT-HEIGHT))))
+
+(begin-for-test
+  
+  ;; inside the cat
+  (check-equal?
+   (in-cat? unselected-cat1-at-20 (+ CAT1-X-COORD 5) 15)
+   true
+   "test of in-cat? with nearby point")
+  
+  (check-equal?
+   (in-cat? unselected-cat1-at-20 
+            (+ CAT1-X-COORD 100) 15)    ;; a coordinate not inside the cat
+   false
+   "test of in-cat? with distant point")
+  
+  )
+
+;; discussion question: are these tests sufficient to test in-cat?
+
+;; initial-world : Number -> World
+;; RETURNS: a world with two unselected cats at the given y coordinate
+(define (initial-world y)
+  (make-world
+   (make-cat CAT1-X-COORD y false SOUTH)
+   (make-cat CAT2-X-COORD y false SOUTH)
+   false))
+
+
+
+
+

@@ -1,0 +1,27 @@
+Date		Who		Start		Stop		interruptions		Questions		TimeOnTask		comment		
+9/22		ZkD		19:24		21:42		0					1				138				finished all the funcs, need to be reviewed 
+9/22		ZkD		21:42		22:06		0					1				24				add some document, still needs more tests 
+============commiting to git: 9/22 22:07 ===================
+9/23		ZkD		11:13		13:40		0					2				147				finished most funcs, need more tests and docs 
+============commiting to git: 9/23 13:42 ===================
+9/23		ZkD		14:08		14:11		0					2				3				add docs 	
+9/23		ZkD		14:11		14:17		0					1				6				add two funcs initial and run 
+9/23		ZkD		14:17		14:50		0					2				33				add more funcs and docs 
+9/23		ZkD		20:50		22:03		0					2				73				add test cases, almost done 
+============commiting to git: 9/23 22:04 ===================
+9/23		ZkD		22:06		22:53		0					1				47				add more tests and reviewed the code 
+============commiting to git: 9/23 22:53 ===================
+9/25		ZkD		10:13		10:38		0					1				25				add the red circle, missed that...
+============commiting to git: 9/25 10:24 ===================
+9/25		ZkD		19:59		20:43		0					1				44				reviewed the code, fixed some minor miatakes 
+9/25		ZkD		20:43		21:50		0					2				67				change to another way to move the cat. 
+============commiting to git: 9/25 21:51 ===================
+9/27		ZkD		20:49		21:20		0					1				31				review the docs 
+9/27		ZkD		21:20		21:50		0					2				30				review the docs 
+============commiting to git: 9/27 21:50 ===================
+9/29		ZkD		10:35		10:52		0					1				17				fix some mistakes about the positions of rects in tests 
+============commiting to git: 9/29 10:55 ===================
+Total Time On Task Q1 (minutes)			332
+Total Time On Task Q2 (minutes)			353
+TOTQ1(hours and tenths): 5.5
+TOTQ2(hours and tenths): 5.8

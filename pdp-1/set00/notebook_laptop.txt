@@ -1,0 +1,20 @@
+Date		Who		Start		Stop		interruptions		Questions		TimeOnTask		comment		
+8/23		ZkD		10:00		10:20		0					1				10				 Registered first time, waiting for being approved
+9/23		ZkD		10:25		10:25		0					2				0				 Done before		
+8/23		ZkD		10:26		10:30		0					3				4				 Done	
+8/23		ZkD		10:30		10:31		0					4				1				 NUwave check, CCIS problem	
+8/23		ZkD		10:31		10:31		0					5				0				 Done this month early		
+8/23		ZkD		10:31		10:31		0					6				0				 Had been done long time ago
+9/8			ZkD		10:00		10:15		0					1				15				 Fixing my CCIS account, and check CCIS-wireless network could work.
+Total Time On Task Q1 (minutes)									25
+Total Time On Task Q2 (minutes)									0
+Total Time On Task Q3 (minutes)									4
+Total Time On Task Q4 (minutes)									1
+Total Time On Task Q5 (minutes)									0
+Total Time On Task Q6 (minutes)									0
+TOTQ1 (hours and tenths)							0.416
+TOTQ2 (hours and tenths)							0.0
+TOTQ3 (hours and tenths)							0.066
+TOTQ4 (hours and tenths)							0.016
+TOTQ5 (hours and tenths)							0.0
+TOTQ6 (hours and tenths)							0.0

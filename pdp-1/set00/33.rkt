@@ -1,0 +1,38 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname |33|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
+(require 2htdp/image)
+
+;; list-length : List -> Number
+;; Returns the length of the given list
+;; Examples: 
+;; (list-length empty) = 0
+;; (list-length (list 1)) = 1
+;; (list-length (list 1 2 3) = 3
+(define (list-length lst)
+  (cond
+    [(empty? lst) 0]
+    [else (+ 1 (list-length (rest lst)))]))
+
+(define (get_whole_string_helpler slst)
+  (cond
+    [(= (list-length slst) 1) (string-append (first slst) "")]
+    [else (string-append (first slst) " " (get_whole_string_helpler (rest slst)))]
+    ))
+
+(define (get_whole_string llst)
+  (cond
+    [(= (list-length llst) 1) (string-append (get_whole_string_helpler (first llst)) "\n")]
+    [else (string-append (get_whole_string_helpler (first llst))
+                         " "
+                         (get_whole_string (rest llst)))]
+    ))
+
+
+;(get_whole_string (list "d" "i" "z"))
+
+
+(define (draw_strings slst)
+  (text/font (get_whole_string slst) 18 "indigo" #f 'script 'slant 'normal #f))
+
+(draw_strings (list (list "Zhikai" "Ding" "PDP") (list "Zhikai1" "Ding1" "PDP1"))) 

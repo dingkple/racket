@@ -1,0 +1,586 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname robot) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
+
+(require "extras.rkt")
+(require rackunit)
+(require "sets.rkt")
+
+(provide path)
+
+(define NORTH "north")
+(define SOUTH "south")
+(define EAST "east")
+(define WEST "west")
+
+(define MV-E (list EAST 1))
+(define MV-S (list SOUTH 1))
+(define MV-W (list WEST 1))
+(define MV-N (list NORTH 1))
+
+(define RIGHT-FRAME 1)
+(define LEFT-FRAME -1)
+
+(define DIRECTION-LST (list EAST SOUTH WEST NORTH))
+
+
+
+
+;; Set07-Question 2-Test
+;; Pengfei Tan
+
+;; (require rackunit)
+;; (require "extras.rkt")
+;; (require "robot_old.rkt")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;                               CONSTANTS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; directions:
+;; (define NORTH "north")
+;; (define EAST "east")
+;; (define SOUTH "south")
+;; (define WEST "west")
+
+;; numbers:
+(define ZERO 0)
+(define ONE 1)
+(define TWO 2)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;                            DATA DEFINITION
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; direction:
+;; A Direction is one of
+;; -- "north"    Interpretation: robot goes north
+;; -- "east"     Interpretation: robot goes east
+;; -- "south"    Interpretation: robot goes south
+;; -- "west"     Interpretation: robot goes west
+;; Template:
+;; direc-fn : Direction -> ??
+#;(define (direc-fn d)
+    (cond
+      [(string=? d NORTH) ...]
+      [(string=? d EAST) ...]
+      [(string=? d SOUTH) ...]
+      [(string=? d WEST) ...]))
+;; Examples:
+(define d1 NORTH)
+
+;; position:
+;; A Position is a (list PosInt PosInt)
+;; (x y) represents the position x, y.
+;; Note: this is not to be confused with the built-in data type Posn.
+;; Template:
+;; pos-fn : Position -> ??
+#;(define (pos-fn p)
+    (...
+     (first p)
+     (second p)))
+;; Examples:
+(define pos-1-1 '(1 1))
+(define s-5-5 '(1 1))
+(define t-5-5 '(4 2))
+(define s-5-5-2 '(3 1))
+(define t-5-5-2 '(1 5))
+(define s-10-10 '(1 1))
+(define t-10-10 '(10 10))
+(define s-circle '(1 1))
+(define t-circle '(6 4))
+
+;; A ListOf<Position> is one of
+;; -- empty
+;; -- (cons Position ListOf<Position>)
+;; Template:
+;; lop-fn : ListOf<Position> -> ??
+#;(define (lop-fn lop)
+    (cond
+      [(empty? lop) ...]
+      [else (...
+             (pos-fn (first lop))
+             (lop-fn (rest lop)))]))
+;; Examples:
+(define block-empty empty)
+(define block-5-5 '((1 3) (1 4) (2 1) (2 5) (3 2) (3 3) (3 5) (4 5)
+                          (5 1) (5 2) (5 3) (5 4) (5 5)))
+(define block-10-10 '((9 7) (8 8) (8 9) (8 10) (10 9) (11 10) (9 11) (10 11)))
+(define block-circle '((5 3) (6 3) (7 3) (7 4) (7 5) (6 5) (5 5) (5 4)))
+
+;; move:
+;; A Move is a (list Direction PosInt)
+;; Interp: a move of the specified number of steps in the indicated direction.
+;; Template:
+;; move-fn : Move -> ??
+#;(define (move-fn m)
+    (...
+     (direc-fn (first m))
+     (second m)))
+;; Examples:
+(define move1 '("east" 5))
+
+;; A ListOf<Move> is one of
+;; -- empty
+;; -- (cons Move ListOf<Move>)
+;; Template:
+;; lom-fn : ListOf<Move> -> ??
+
+
+
+
+
+;; A Position is a (list PosInt PosInt)
+;; (x y) represents the position at position x, y.
+;; Note: this is not to be confused with the built-in data type Posn.
+
+;; A LOP(lsit of Positions) is one of:
+;;  --empty
+;;  --(cons Position LOP)
+;; Interp:
+;;  a lop is either an empty list or a list of positions
+
+;; A Move is a (list Direction PosInt)
+;; Interp: a move of the specified number of steps in the indicated
+;; direction. 
+
+;; A Direction is one of
+;; -- "north"
+;; -- "east"
+;; -- "south"
+;; -- "west"
+
+;; A LOD(list of directions) is one of:
+;;  --empty
+;;  --(cons Direction LOD)
+;; Interp:
+;;  a LOD is either an empty list of a list of directions
+
+
+;; A Square is a (list LOD Position)
+;; Interp: the first member is a list of directions, representing the
+;; directions the next move can towards to
+
+;; A Path(list of Squares) is one of:
+;;  --empty
+;;  --(cons Square Path)
+;; Interp:
+;;  a path is either a empty list of a list of squares
+;; Template: 
+;; (define (Path-fn path)
+;;   (conpathd
+;;     [(empty? path) empty]
+;;     [else (...(sq-fn (first path))
+;;               (path-fn (rest path)))]))
+
+
+;; A Plan is a ListOf<Move>
+;; WHERE: the list does not contain two consecutive moves in the same
+;; direction.
+
+;; A RealPlan is a NonEmptyListOf<Move>
+;; Interp:
+;;    the realplan is not empty
+;; Template:
+;; (define (rp-fn rp)
+;;   (...(first rp) (rest rp)))
+
+;; A List is one of:
+;;  --empty
+;;  --(cons Struct List)
+;; Interp:
+;;  a List is a just a list, it can contains anything
+;; Template:
+;; (define (l-fn lst)
+;;   (cond
+;;     [(empty? lst) empty]
+;;     [else (... (first lst)
+;;                (l-fn (rest lst)))]))  
+
+
+;; A AllInfo is a (list Position Plan Path)
+;; Interp:
+;; Position
+;; Plan
+;; Path
+;; Template:
+;; (define (al-fn al)
+;;   (pos-fn (first al))
+;;   (plan-fn (second al))
+;;   (path-fn (third al)))
+
+
+(define block-example 
+  (list (list 1 2) (list 1 3) (list 3 2) 
+        (list 3 4) (list 4 1) (list 4 4)))
+(define block-example1 
+  (list (list 4 1) (list 4 2) (list 4 3) (list 4 4)
+         (list 1 2) (list 2 2) (list 3 5)))
+
+;; path : Position Position ListOf<Position> -> Maybe<Plan>>
+;; GIVEN:
+;; 1. the starting position of the robot,
+;; 2. the target position that robot is supposed to reach
+;; 3. A list of the blocks on the board
+;; RETURNS: a plan that, when executed, will take the robot from
+;; the starting position to the target position without passing over any
+;; of the blocks, or false if no such sequence of moves exists.
+;; EXAMPLES: (path (list 1 1) (list 2 1) empty) -> (list ("east" 1))
+;; STRATEGY: function composition
+(define (path sp ep bls)
+  (move-get-from-path-prepare (prepare-to-find-path sp ep bls)))
+
+;; prepare-to-find-path: Position Position LOP -> Path
+;; GIVEN: a start position, an end position and a list of positions as
+;;    blocks
+;; RETURNS: a list of continuous squares from the start position to
+;;    the end position iff there exists a way, or return an empty list
+;; EXAMPLES: (prepare-to-find-path (list 1 1) (list 2 1) empty)
+          ;; -> '((() (1 1)) (() (2 1)))
+;; STRATEGY: function composition
+(define (prepare-to-find-path sp ep bls)
+  (findpath sp ep bls (list (gather-info sp ep bls empty))))
+
+;; findpath: Position Position Path -> a Path
+;; GIVEN: a start position, an end position and a list of positions as
+;;    blocks
+;; WHERE: the Path is the list of squares from the original start point
+;;    to the current start point
+;; RETURNS: a list of continuous squares from the start position to
+;;    the end position iff there exists a way, or return an empty list
+;; EXAMPLES: 
+;; STRATEGY: 
+(define (findpath sp ep bls path)
+  (if (equal? sp ep)
+      path
+      (try-to-find ep bls (last path) path)))
+
+;; try-to-find: Position LOP Square Path -> Path
+;; GIVEN: a start position, an end position and a list of positions as
+;;    blocks
+;; WHERE: the Path is the list of squares from the original start point
+;;    to the current start point
+;; RETURNS: a list of continuous squares from the start position to
+;;    the end position iff there exists a way, or return an empty list
+;; EXAMPLES: 
+;; STRATEGY:
+(define (try-to-find ep bls lsq path)
+  (if (nowhere-to-go? lsq)
+      (go-back-to-find ep bls path)
+      (go-on-current-way ep bls path)))
+
+;; nowhere-to-go: Square -> Boolean
+;; GIVEN: a square
+;; RETURNS: true iff the first element of the given square is not empty
+;; EXAMPLES: 
+;; STRATEGY: 
+(define (nowhere-to-go? lsq)
+  (empty? (first lsq)))
+
+;; go-back-to-find: Position LOP Path -> Path
+;; GIVEN: an end position, a list of positions as blocks and a list of squares
+;; WHERE: 1)the position is the end position to stop
+;;        2)the given list of positions is the blocks the robot can not pass
+;;     through
+;;        3)the list of squares if the square from the original start point to
+;;     the robot's position
+;; RETURNS: a list of squares from the original position to the given end
+;;     position iff there exists a way, else empty
+;; EXAMPLES: 
+;; STRATEGY: 
+(define (go-back-to-find ep bls path)
+  (go-on-current-way ep bls (find-last-way ep bls path)))
+  
+
+
+(define (find-last-way ep bls path)
+  (foldr
+     (lambda (p ans)
+       (if (and (empty? (first p)) (equal? p (last ans)))
+           (drop-last ans)
+           ;; (stay-or-find-new-way p ep bls ans)))
+           ans))
+     path
+     path))
+
+
+
+;; (define (stay-or-find-new-way p ep bls path)
+;;   (if (or (empty? path) (equal? ep (second (last path))))
+;;       path
+;;       (go-this-direction 
+;;         ep p bls
+;;         (update-path-direction p (drop-last path)))))
+
+(define (go-this-direction ep sq bls path)
+  (findpath 
+   (pos-by-move (second sq) (first (first sq)))
+   ep
+   bls
+   (path-one-step-further ep path sq bls)))
+
+(define (path-one-step-further ep path sq bls)
+  (append 
+    path 
+    (list 
+      (gather-info 
+        (pos-by-move (second sq) (first (first sq))) 
+        ep bls path))))
+
+(define (go-on-current-way ep bls path)
+  (if (empty? path)
+      path
+      (findpath 
+       (pos-by-move-from-square (last path))
+       ep
+       bls 
+       (path-for-further ep bls path))))
+
+(define (path-for-further ep bls path)
+  (append 
+   (update-path-direction (last path) (drop-last path)) 
+   (list 
+    (gather-info 
+     (first-move-from-path path) 
+     ep bls path))))
+
+(define (update-path-direction p path)
+  (append path (list (list (rest (first p)) (second p)))))
+
+(define (pos-by-move-from-square sq)
+  (pos-by-move (second sq) (first (first sq))))
+
+
+(define (first-move-from-path path)
+  (pos-by-move (second (last path)) (first (first (last path)))))
+
+
+(define (last lst)
+  (cond
+    [(empty? lst) empty]
+    [else (first (reverse lst))]))
+
+
+(define (check-pos p ep bls path)
+  (and (> (first p) 0)
+       (> (second p) 0)
+       (<= (first p) (find-frame (set-cons ep bls) RIGHT-FRAME))
+       (<= (second p) (find-frame (set-cons ep bls) LEFT-FRAME))
+       (not (exists-in-path? p path))
+       (not (my-member? p bls))))
+
+(define (find-frame lop f)
+  (+ 1 (foldr
+        (lambda (p ans)
+          (if (= f RIGHT-FRAME)
+              (max (first p) ans)
+              (max (second p) ans)))
+        0
+        lop)))
+
+(define (exists-in-path? p0 path)
+  (ormap
+   (lambda (p)
+     (equal? p0 (second p)))
+   path))
+
+(define (pos-by-move p d)
+  (cond
+    [(string=? d NORTH) (list (first p) (- (second p) 1))]
+    [(string=? d SOUTH) (list (first p) (+ (second p) 1))]
+    [(string=? d WEST) (list (- (first p) 1) (second p))]
+    [(string=? d EAST) (list (+ (first p) 1) (second p))]))
+
+(define (gather-info sp ep bls path)
+  (foldr
+   (lambda (d ans)
+     (if (check-pos (pos-by-move sp d) ep bls path)
+         (list (cons d (first ans)) (second ans))
+         ans))
+   (list empty sp)
+   DIRECTION-LST))
+
+(define (direction-by-pos p1 p2)
+  (direction-by-vector 
+    (- (first p2) (first p1)) 
+    (- (second p2) (second p1))))
+
+(define (direction-by-vector vx vy)
+  (cond
+    [(and (= 1 vx) (= 0 vy)) EAST]
+    [(and (= 0 vx) (= 1 vy)) SOUTH]
+    [(and (= -1 vx) (= 0 vy)) WEST]
+    [(and (= 0 vx) (= -1 vy)) NORTH]))
+
+(define (move-get-from-path-prepare path)
+  (if (empty? path)
+      false
+      (move-get-from-path path)))
+
+(define (first-plan-from-path path)
+  (list (direction-by-pos (second (first path)) 
+                                (second (second path))) 1))
+
+(define (move-get-from-path path)
+  (if (empty? path)
+      false
+      (second
+        (all-info-get-from-path
+          (second (second path))
+          (list (first-plan-from-path path))
+          (rest (rest path))))))
+
+(define (all-info-get-from-path sp plan path)
+  (foldl
+    (lambda (sq ans)
+      (if (going-old-direction? (first ans) (second ans) (third ans))
+          (move-along-ori-direction sq (second ans) (third ans))
+          (move-along-new-direction (first ans) sq (second ans) (third ans))))
+    (list sp plan path)
+    path))
+
+(define (going-old-direction? sp plan path)
+  (string=? (direction-by-pos sp (second (first path))) (first (last plan))))
+  
+
+;; move-along-ori-direction: RealPlan Path -> Realplan 
+;; WHERE:  1)the position is the current position, not the original one
+;;         2)the realplan is from the original start point to current start point
+;;         3)the path is from the next square to the end position
+;; RETURNS: a realplan from the original position to the original end position
+;; EXAMPLES: 
+;; STRATEGY: structure decomposition on path
+(define (move-along-ori-direction sq rp path)
+  (list (second sq) (one-step-to-move rp) (rest path)))
+
+;; move-along-new-direction: Position Path -> RealPlan
+;; GIVEN: a start position, a realplan and a path
+;; WHERE:  1)the position is the current position, not the original one
+;;         2)the realplan is from the original start point to current start point
+;;         3)the path is from the next square to the end position
+;; RETURNS: a realplan from the original position to the original end position
+;; EXAMPLES: 
+;; STRATEGY: 
+(define (move-along-new-direction last sq plan path)
+  (list 
+    (second sq) 
+    (add-new-move plan (direction-by-pos last (second sq)))
+    (rest path)))
+
+;; one-step-to-move: Plan -> Plan
+;; GIVEN: a plan from the original start position to the previous position
+;; RETURNS: the given plan whose last move is udpated by adding 1 to the second
+;;     element of the move
+;; EXAMPLES: (one-step-to-move (list ("east 1"))) -> (list ("east" 2))
+;; STRATEGY: structure decomposition on Move
+(define (one-step-to-move mvs)
+  (append 
+   (drop-last mvs)
+   (list (list (first (last mvs)) (+ 1 (second (last mvs)))))))
+
+;; drop-last: List -> List 
+;; GIVEN: a list of anything
+;; RETURNS: empty iff the given list is empty, else the given list except the 
+;;     last element of the list is deleted
+;; EXAMPLES: (drop-last (list a 1)) -> (list a)
+;; STRATEGY: structure decomposition on lst: List
+(define (drop-last lst)
+  (cond
+    [(empty? lst) empty]
+    [else (reverse (rest (reverse lst)))]))
+  
+
+(define (add-new-move mvs mv)
+  (append mvs (list (list mv 1))))
+
+;; (path (list 1 1) (list 8 6) block-example1)
+;; (path (list 1 1) (list 2 1) empty)
+;; (prepare-to-find-path (list 1 1) (list 1 2) empty)
+
+
+;; (path (list 1 1) (list 5 5) empty)
+
+
+
+
+
+
+
+
+
+
+#;(define (lom-fn lom)
+    (cond
+      [(empty? lom) ...]
+      [else (...
+             (move-fn (first lom))
+             (lom-fn (rest lom)))]))
+;; Examples:
+(define lom1 (list move1))
+
+;; A Plan is a ListOf<Move>
+;; WHERE: the list does not contain two consecutive moves in the same direction.
+;; Examples:
+(define plan1 lom1)
+(define plan-5-5 '(("south" 1)
+                   ("east" 1)
+                   ("south" 2)
+                   ("east" 2)
+                   ("north" 2)))
+(define plan-false false)
+(define plan-10-10 '(("east" 9) ("south" 7) ("west" 1) ("south" 2) ("east" 1)))
+
+;; A Maybe<Plan> is one of
+;; -- Plan     Interpretation: a list of move that record the path 
+;;             from start to target
+;; -- false    Interpretation: there's no path from start to target
+;; Template:
+;; maybep-fn : Maybe<Plan> -> ??
+#;(define (maybep-fn mp)
+    (cond
+      [(false? mp)...]
+      [else (...
+             (lom-fn mp))]))
+;; Examples:
+(define maybeplan-false false)
+(define maybeplan1 plan1)
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;                              TEST
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; TESTS:
+(begin-for-test
+  (check-equal? (path s-5-5 t-5-5 block-5-5) plan-5-5
+                "Find a path from s-5-5 to t-5-5 is plan 5-5.")
+  (check-equal? (path s-5-5-2 t-5-5-2 block-5-5) plan-false
+                "There's no path from s-5-5-2 to t-5-5-2.")
+  (check-equal? (path s-10-10 t-10-10 block-10-10) plan-10-10
+                "Find a path from s-10-10 to t-10-10 is plan-10-10.")
+  (check-equal? (path s-circle t-circle block-circle) plan-false
+                "There's no path from (1 1) to (6 4)."))
+
+
+(path (list 1 1) (list 1 2) empty)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

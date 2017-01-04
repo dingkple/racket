@@ -1,0 +1,868 @@
+#lang scribble/base
+@(require scribble/manual)
+@title{CS5010 - Problem Set 06 - Test Results}
+@author{pdp-pair-shifuxu-zhikai}
+This test suite tests your implementation of Problem Set 05
+@section{File: outlines.rkt}
+Tests your implementation of outlines
+@subsection{Test-Group: Problem statement example (2 Points)}
+@margin-note[#:left? #t]{2/2}
+
+@subsubsection{Test (equality)}
+
+@para{This is the example that was given in the problem statement.}
+Input:
+@racketblock{@(nested-to-flat
+ '(("The first section"
+    ("A subsection with no subsections")
+    ("Another subsection"
+     ("This is a subsection of 1.2")
+     ("This is another subsection of 1.2"))
+    ("The last subsection of 1"))
+   ("Another section" ("More stuff") ("Still more stuff"))))
+}
+Expected Output:
+@racketblock{@'(((1) "The first section")
+  ((1 1) "A subsection with no subsections")
+  ((1 2) "Another subsection")
+  ((1 2 1) "This is a subsection of 1.2")
+  ((1 2 2) "This is another subsection of 1.2")
+  ((1 3) "The last subsection of 1")
+  ((2) "Another section")
+  ((2 1) "More stuff")
+  ((2 2) "Still more stuff"))
+}
+Expected Output Value:
+@racketblock{@(((1) "The first section")
+ ((1 1) "A subsection with no subsections")
+ ((1 2) "Another subsection")
+ ((1 2 1) "This is a subsection of 1.2")
+ ((1 2 2) "This is another subsection of 1.2")
+ ((1 3) "The last subsection of 1")
+ ((2) "Another section")
+ ((2 1) "More stuff")
+ ((2 2) "Still more stuff"))
+}
+Correct
+@subsection{Test-Group: Some more examples (3 Points)}
+@margin-note[#:left? #t]{3/3}
+
+@subsubsection{Test (equality)}
+
+@para{}
+Input:
+@racketblock{@(nested-to-flat '(("Only one section here")))
+}
+Expected Output:
+@racketblock{@'(((1) "Only one section here"))
+}
+Expected Output Value:
+@racketblock{@(((1) "Only one section here"))
+}
+Correct
+@subsubsection{Test (equality, 1 partial points)}
+
+@para{}
+Input:
+@racketblock{@(nested-to-flat '(("First Section") ("Second Section")))
+}
+Expected Output:
+@racketblock{@'(((1) "First Section") ((2) "Second Section"))
+}
+Expected Output Value:
+@racketblock{@(((1) "First Section") ((2) "Second Section"))
+}
+Correct
+@subsubsection{Test (equality, 1 partial points)}
+
+@para{}
+Input:
+@racketblock{@(nested-to-flat
+ '(("One"
+    ("One Point One"
+     ("One Point One Point One"
+      ("One Point One Point One Point One"
+       ("One Point One Point One Point One Point One")))))))
+}
+Expected Output:
+@racketblock{@'(((1) "One")
+  ((1 1) "One Point One")
+  ((1 1 1) "One Point One Point One")
+  ((1 1 1 1) "One Point One Point One Point One")
+  ((1 1 1 1 1) "One Point One Point One Point One Point One"))
+}
+Expected Output Value:
+@racketblock{@(((1) "One")
+ ((1 1) "One Point One")
+ ((1 1 1) "One Point One Point One")
+ ((1 1 1 1) "One Point One Point One Point One")
+ ((1 1 1 1 1) "One Point One Point One Point One Point One"))
+}
+Correct
+@subsubsection{Test (equality, 1 partial points)}
+
+@para{}
+Input:
+@racketblock{@(nested-to-flat
+ '(("One"
+    ("One Point One"
+     ("One Point One Point One"
+      ("One Point One Point One Point One"
+       ("One Point One Point One Point One Point One")))))
+   ("Two")))
+}
+Expected Output:
+@racketblock{@'(((1) "One")
+  ((1 1) "One Point One")
+  ((1 1 1) "One Point One Point One")
+  ((1 1 1 1) "One Point One Point One Point One")
+  ((1 1 1 1 1) "One Point One Point One Point One Point One")
+  ((2) "Two"))
+}
+Expected Output Value:
+@racketblock{@(((1) "One")
+ ((1 1) "One Point One")
+ ((1 1 1) "One Point One Point One")
+ ((1 1 1 1) "One Point One Point One Point One")
+ ((1 1 1 1 1) "One Point One Point One Point One Point One")
+ ((2) "Two"))
+}
+Correct
+@subsection{Test-Group: Test for nested-rep? (2 Points)}
+@margin-note[#:left? #t]{2/2}
+
+@subsubsection{Test (equality, 0.25 partial points)}
+
+@para{Simple Nested rep}
+Input:
+@racketblock{@(nested-rep? '(("One")))
+}
+Expected Output:
+@racketblock{@#t
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{Nat is an invalid nested rep}
+Input:
+@racketblock{@(nested-rep? 1)
+}
+Expected Output:
+@racketblock{@#f
+}
+Expected Output Value:
+@racketblock{@#f
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{String is an invalid nested rep}
+Input:
+@racketblock{@(nested-rep? "One")
+}
+Expected Output:
+@racketblock{@#f
+}
+Expected Output Value:
+@racketblock{@#f
+}
+Correct
+@subsubsection{Test (equality, 0.5 partial points)}
+
+@para{Problem set example}
+Input:
+@racketblock{@(nested-rep?
+ '(("The first section"
+    ("A subsection with no subsections")
+    ("Another subsection"
+     ("This is a subsection of 1.2")
+     ("This is another subsection of 1.2"))
+    ("The last subsection of 1"))
+   ("Another section" ("More stuff") ("Still more stuff"))))
+}
+Expected Output:
+@racketblock{@#t
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsubsection{Test (equality, 0.25 partial points)}
+
+@para{Flat rep is not a nested rep}
+Input:
+@racketblock{@(nested-rep?
+ '(("The first section"
+    ("A subsection")
+    ()
+    ("A subsection after an empty one"))))
+}
+Expected Output:
+@racketblock{@#f
+}
+Expected Output Value:
+@racketblock{@#f
+}
+Correct
+@subsubsection{Test (equality, 0.25 partial points)}
+
+@para{Raw first section.}
+Input:
+@racketblock{@(nested-rep? '("First Section" ("A subsection")))
+}
+Expected Output:
+@racketblock{@#f
+}
+Expected Output Value:
+@racketblock{@#f
+}
+Correct
+@subsubsection{Test (equality, 0.25 partial points)}
+
+@para{No first section in the nested rep}
+Input:
+@racketblock{@(nested-rep? '((("No first section"))))
+}
+Expected Output:
+@racketblock{@#f
+}
+Expected Output Value:
+@racketblock{@#f
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{Empty is a valid nested outline}
+Input:
+@racketblock{@(nested-rep? empty)
+}
+Expected Output:
+@racketblock{@#t
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{No string in first section.}
+Input:
+@racketblock{@(nested-rep? '(()))
+}
+Expected Output:
+@racketblock{@#f
+}
+Expected Output Value:
+@racketblock{@#f
+}
+Correct
+@section{File: pretty.rkt}
+Tests your implementation of pretty print for expr
+@para{Common Definitions}
+
+@racketblock{@(define check-not-enough-room (lambda (x) (exn:fail? x)))
+}@racketblock{@(define get-width
+  (lambda (l) (foldr max 0 (map (lambda (i) (string-length i)) l))))
+}
+
+@subsection{Test-Group: Simple special cases (2 Points)}
+@margin-note[#:left? #t]{2/2}
+
+@para{Common Definitions}
+
+@racketblock{@(define SIMPLE-SUM (make-sum-exp (list 1337 42)))
+}@racketblock{@(define SSUM-ONE-LINE-LIST (list "(+ 1337 42)"))
+}@racketblock{@(define SSUM-ONE-LINE-WIDTH (string-length "(+ 1337 42)"))
+}@racketblock{@(define SSUM-TWO-LINE-WIDTH (string-length "(+ 1337"))
+}@racketblock{@(define SSUM-TWO-LINE-LIST (list "(+ 1337" "   42)"))
+}@racketblock{@(define SIMPLE-MULT (make-mult-exp (list 74656 1701)))
+}@racketblock{@(define SMULT-ONE-LINE-LIST (list "(* 74656 1701)"))
+}@racketblock{@(define SMULT-TWO-LINE-LIST (list "(* 74656" "   1701)"))
+}@racketblock{@(define SMULT-ONE-LINE-WIDTH (string-length "(* 74656 1701)"))
+}@racketblock{@(define SMULT-TWO-LINE-WIDTH (string-length "(* 74656"))
+}
+
+@subsubsection{Test (equality, 0.5 partial points)}
+
+@para{Test for a single number rendering}
+Input:
+@racketblock{@(expr-to-strings 5 1)
+}
+Expected Output:
+@racketblock{@(list "5")
+}
+Expected Output Value:
+@racketblock{@("5")
+}
+Correct
+@subsubsection{Test (and, 0.5 partial points)}
+
+@para{Simple sum}
+@subsubsub*section{Test (equality)}
+
+@para{Simple sum exp should come in a single list}
+Input:
+@racketblock{@(expr-to-strings SIMPLE-SUM SSUM-ONE-LINE-WIDTH)
+}
+Expected Output:
+@racketblock{@SSUM-ONE-LINE-LIST
+}
+Expected Output Value:
+@racketblock{@("(+ 1337 42)")
+}
+Correct
+@subsubsub*section{Test (error)}
+
+@para{Simple sum exp cannot fit in given width}
+Input:
+@racketblock{@(expr-to-strings SIMPLE-SUM (- SSUM-TWO-LINE-WIDTH 1))
+}
+Expected Error should match:
+@racketblock{@check-not-enough-room
+}
+Correct
+@subsubsection{Test (and, 0.5 partial points)}
+
+@para{Simple mult}
+@subsubsub*section{Test (equality)}
+
+@para{Simple mult exp in one line}
+Input:
+@racketblock{@(expr-to-strings SIMPLE-MULT SMULT-ONE-LINE-WIDTH)
+}
+Expected Output:
+@racketblock{@SMULT-ONE-LINE-LIST
+}
+Expected Output Value:
+@racketblock{@("(* 74656 1701)")
+}
+Correct
+@subsubsub*section{Test (error)}
+
+@para{Simple mult exp does not fit in given width}
+Input:
+@racketblock{@(expr-to-strings SIMPLE-MULT (- SMULT-TWO-LINE-WIDTH 1))
+}
+Expected Error should match:
+@racketblock{@check-not-enough-room
+}
+Correct
+@subsection{Test-Group: Nested expressions (2 Points)}
+@margin-note[#:left? #t]{2/2}
+
+@para{Common Definitions}
+
+@racketblock{@(define EXPR
+  (make-mult-exp
+   (list
+    (make-sum-exp (list 1000 2000 3000))
+    (make-sum-exp (list 50 60)))))
+}@racketblock{@(define EXPR-ONE-LINE-LIST (list "(* (+ 1000 2000 3000) (+ 50 60))"))
+}@racketblock{@(define EXPR-TWO-LINE-LIST
+  (list "(* (+ 1000 2000 3000)" "   (+ 50 60))"))
+}@racketblock{@(define EXPR-FOUR-LINE-LIST
+  (list "(* (+ 1000" "      2000" "      3000)" "   (+ 50 60))"))
+}@racketblock{@(define EXPR-FIVE-LINE-LIST
+  (list
+   "(* (+ 1000"
+   "      2000"
+   "      3000)"
+   "   (+ 50"
+   "      60))"))
+}
+
+@subsubsection{Test (equality, 0.25 partial points)}
+
+@para{When given enough space, EXPR should be rendered on one line}
+Input:
+@racketblock{@(expr-to-strings EXPR (get-width EXPR-ONE-LINE-LIST))
+}
+Expected Output:
+@racketblock{@EXPR-ONE-LINE-LIST
+}
+Expected Output Value:
+@racketblock{@("(* (+ 1000 2000 3000) (+ 50 60))")
+}
+Correct
+@subsubsection{Test (equality, 0.5 partial points)}
+
+@para{When given slightly not enough space to render EXPR on one line, it should be rendered in two lines}
+Input:
+@racketblock{@(expr-to-strings EXPR (- (get-width EXPR-ONE-LINE-LIST) 1))
+}
+Expected Output:
+@racketblock{@EXPR-TWO-LINE-LIST
+}
+Expected Output Value:
+@racketblock{@("(* (+ 1000 2000 3000)" "   (+ 50 60))")
+}
+Correct
+@subsubsection{Test (equality, 0.5 partial points)}
+
+@para{When rendered with the minimal possible width, the image of EXPR should have 5 lines}
+Input:
+@racketblock{@(expr-to-strings EXPR (get-width EXPR-FIVE-LINE-LIST))
+}
+Expected Output:
+@racketblock{@EXPR-FIVE-LINE-LIST
+}
+Expected Output Value:
+@racketblock{@("(* (+ 1000" "      2000" "      3000)" "   (+ 50" "      60))")
+}
+Correct
+@subsubsection{Test (error, 0.25 partial points)}
+
+@para{When called with less than the minimal possible width, expr-to-strings should throw an error}
+Input:
+@racketblock{@(expr-to-strings EXPR (- (get-width EXPR-FIVE-LINE-LIST) 1))
+}
+Expected Error should match:
+@racketblock{@check-not-enough-room
+}
+Correct
+@subsection{Test-Group: Complex expressions (3 Points)}
+@margin-note[#:left? #t]{2.5/3}
+
+@para{Common Definitions}
+
+@racketblock{@(define EXPR
+  (make-sum-exp
+   (list
+    (make-mult-exp (list 1))
+    63450680
+    (make-sum-exp (list 5 3))
+    4
+    (make-mult-exp (list 1234567890 67450))
+    (make-sum-exp
+     (list
+      40
+      (make-sum-exp
+       (list
+        (make-mult-exp (list 45830 5834))
+        (make-mult-exp (list 56 6543))))))
+    1337)))
+}@racketblock{@(define EXPR-ONE-LINE-LIST
+  (list
+   "(+ (* 1) 63450680 (+ 5 3) 4 (* 1234567890 67450) (+ 40 (+ (* 45830 5834) (* 56 6543))) 1337)"))
+}@racketblock{@(define EXPR-MAX-LINE-LIST
+  (list
+   "(+ (* 1)"
+   "   63450680"
+   "   (+ 5 3)"
+   "   4"
+   "   (* 1234567890"
+   "      67450)"
+   "   (+ 40"
+   "      (+ (* 45830"
+   "            5834)"
+   "         (* 56"
+   "            6543)))"
+   "   1337)"))
+}@racketblock{@(define EXPR-SEVEN-LINE-LIST
+  (list
+   "(+ (* 1)"
+   "   63450680"
+   "   (+ 5 3)"
+   "   4"
+   "   (* 1234567890 67450)"
+   "   (+ 40 (+ (* 45830 5834) (* 56 6543)))"
+   "   1337)"))
+}@racketblock{@(define EXPR-EIGHT-LINE-LIST
+  (list
+   "(+ (* 1)"
+   "   63450680"
+   "   (+ 5 3)"
+   "   4"
+   "   (* 1234567890 67450)"
+   "   (+ 40"
+   "      (+ (* 45830 5834) (* 56 6543)))"
+   "   1337)"))
+}@racketblock{@(define EXPR-NINE-LINE-LIST
+  (list
+   "(+ (* 1)"
+   "   63450680"
+   "   (+ 5 3)"
+   "   4"
+   "   (* 1234567890 67450)"
+   "   (+ 40"
+   "      (+ (* 45830 5834)"
+   "         (* 56 6543)))"
+   "   1337)"))
+}@racketblock{@(define EXPR-ELEVEN-LINE-LIST
+  (list
+   "(+ (* 1)"
+   "   63450680"
+   "   (+ 5 3)"
+   "   4"
+   "   (* 1234567890"
+   "      67450)"
+   "   (+ 40"
+   "      (+ (* 45830"
+   "            5834)"
+   "         (* 56 6543)))"
+   "   1337)"))
+}
+
+@subsubsection{Test (equality, 0.25 partial points)}
+
+@para{The width of EXPR on one line should be equal to the width of the image of it's string representation on one line}
+Input:
+@racketblock{@(expr-to-strings EXPR (get-width EXPR-ONE-LINE-LIST))
+}
+Expected Output:
+@racketblock{@EXPR-ONE-LINE-LIST
+}
+Expected Output Value:
+@racketblock{@("(+ (* 1) 63450680 (+ 5 3) 4 (* 1234567890 67450) (+ 40 (+ (* 45830 5834) (* 56 6543))) 1337)")
+}
+Correct
+@subsubsection{Test (equality, 0.25 partial points)}
+
+@para{Rendering the image of EXPR with a limit slightly smaller than the maximum width should yield seven lines}
+Input:
+@racketblock{@(expr-to-strings EXPR (- (get-width EXPR-ONE-LINE-LIST) 1))
+}
+Expected Output:
+@racketblock{@EXPR-SEVEN-LINE-LIST
+}
+Expected Output Value:
+@racketblock{@("(+ (* 1)"
+ "   63450680"
+ "   (+ 5 3)"
+ "   4"
+ "   (* 1234567890 67450)"
+ "   (+ 40 (+ (* 45830 5834) (* 56 6543)))"
+ "   1337)")
+}
+Correct
+@subsubsection{Test (equality, 0.5 partial points)}
+
+@para{An image of EXPR created with bounds that are only slightly too narrow to render it on 7 lines should have 8 lines.}
+Input:
+@racketblock{@(expr-to-strings EXPR (- (get-width EXPR-SEVEN-LINE-LIST) 1))
+}
+Expected Output:
+@racketblock{@EXPR-EIGHT-LINE-LIST
+}
+Expected Output Value:
+@racketblock{@("(+ (* 1)"
+ "   63450680"
+ "   (+ 5 3)"
+ "   4"
+ "   (* 1234567890 67450)"
+ "   (+ 40"
+ "      (+ (* 45830 5834) (* 56 6543)))"
+ "   1337)")
+}
+Correct
+@subsubsection{Test (equality, 0.5 partial points)}
+
+@para{An image of EXPR created with bounds that are only slightly too narrow to render it on 8 lines should have 9 lines.}
+Input:
+@racketblock{@(expr-to-strings EXPR (- (get-width EXPR-EIGHT-LINE-LIST) 1))
+}
+Expected Output:
+@racketblock{@EXPR-NINE-LINE-LIST
+}
+Expected Output Value:
+@racketblock{@("(+ (* 1)"
+ "   63450680"
+ "   (+ 5 3)"
+ "   4"
+ "   (* 1234567890 67450)"
+ "   (+ 40"
+ "      (+ (* 45830 5834)"
+ "         (* 56 6543)))"
+ "   1337)")
+}
+Correct
+@subsubsection{Test (equality, 0.5 partial points)}
+
+@para{An image of EXPR created with bounds that are only slightly too narrow to render it on 9 lines should have 11 lines.}
+Input:
+@racketblock{@(expr-to-strings EXPR (- (get-width EXPR-NINE-LINE-LIST) 1))
+}
+Expected Output:
+@racketblock{@EXPR-ELEVEN-LINE-LIST
+}
+Expected Output Value:
+@racketblock{@("(+ (* 1)"
+ "   63450680"
+ "   (+ 5 3)"
+ "   4"
+ "   (* 1234567890"
+ "      67450)"
+ "   (+ 40"
+ "      (+ (* 45830"
+ "            5834)"
+ "         (* 56 6543)))"
+ "   1337)")
+}
+Correct
+@subsubsection{Test (equality, 0.25 partial points)}
+
+@para{Rendering EXPR with the minimal possible width should result in an image with 12 lines}
+Input:
+@racketblock{@(expr-to-strings EXPR (- (get-width EXPR-ELEVEN-LINE-LIST) 1))
+}
+Expected Output:
+@racketblock{@EXPR-MAX-LINE-LIST
+}
+Expected Output Value:
+@racketblock{@("(+ (* 1)"
+ "   63450680"
+ "   (+ 5 3)"
+ "   4"
+ "   (* 1234567890"
+ "      67450)"
+ "   (+ 40"
+ "      (+ (* 45830"
+ "            5834)"
+ "         (* 56"
+ "            6543)))"
+ "   1337)")
+}
+Correct
+@subsubsection{Test (error, 0.25 partial points)}
+
+@para{Trying to render EXPR with less than the minimal possible width should result in an error}
+Input:
+@racketblock{@(expr-to-strings EXPR (- (get-width EXPR-MAX-LINE-LIST) 1))
+}
+Expected Error should match:
+@racketblock{@check-not-enough-room
+}
+Correct
+@subsubsection{Test (equality, 0.25 partial points)}
+
+@para{Render an expr with just enough room for a parenthese.}
+Input:
+@racketblock{@(expr-to-strings
+ (make-sum-exp
+  (list 1234 567 (make-sum-exp (list (make-sum-exp (list 1 1)) 1))))
+ 13)
+}
+Expected Output:
+@racketblock{@(list "(+ 1234" "   567" "   (+ (+ 1 1)" "      1)))")
+}
+Expected Output Value:
+@racketblock{@("(+ 1234" "   567" "   (+ (+ 1 1)" "      1)))")
+}
+Wrong Output:
+@racketblock{@("(+ 1234" "   567" "   (+ (+ 1 1)" "      1))")
+}
+@subsection{Test-Group: The Two Column Bug (1 Points)}
+@margin-note[#:left? #t]{1/1}
+
+@para{Common Definitions}
+
+@racketblock{@(define EXPR
+  (make-sum-exp
+   (list
+    (make-mult-exp (build-list 20 add1))
+    (make-mult-exp (build-list 20 add1)))))
+}@racketblock{@(define EXPR-ONE-LINE-LIST
+  (list
+   "(+ (* 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20) (* 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20))"))
+}@racketblock{@(define EXPR-TWO-LINE-LIST
+  (list
+   "(+ (* 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20)"
+   "   (* 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20))"))
+}@racketblock{@(define EXPR-MAX-LINE-LIST
+  (list
+   "(+ (* 1"
+   "      2"
+   "      3"
+   "      4"
+   "      5"
+   "      6"
+   "      7"
+   "      8"
+   "      9"
+   "      10"
+   "      11"
+   "      12"
+   "      13"
+   "      14"
+   "      15"
+   "      16"
+   "      17"
+   "      18"
+   "      19"
+   "      20)"
+   "   (* 1"
+   "      2"
+   "      3"
+   "      4"
+   "      5"
+   "      6"
+   "      7"
+   "      8"
+   "      9"
+   "      10"
+   "      11"
+   "      12"
+   "      13"
+   "      14"
+   "      15"
+   "      16"
+   "      17"
+   "      18"
+   "      19"
+   "      20))"))
+}@racketblock{@(define EXPR-21-LINE-LIST
+  (list
+   "(+ (* 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20)"
+   "   (* 1"
+   "      2"
+   "      3"
+   "      4"
+   "      5"
+   "      6"
+   "      7"
+   "      8"
+   "      9"
+   "      10"
+   "      11"
+   "      12"
+   "      13"
+   "      14"
+   "      15"
+   "      16"
+   "      17"
+   "      18"
+   "      19"
+   "      20))"))
+}
+
+@subsubsection{Test (equality)}
+
+@para{Enough room to render on one line}
+Input:
+@racketblock{@(expr-to-strings EXPR (get-width EXPR-ONE-LINE-LIST))
+}
+Expected Output:
+@racketblock{@EXPR-ONE-LINE-LIST
+}
+Expected Output Value:
+@racketblock{@("(+ (* 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20) (* 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20))")
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{An image of EXPR created with bounds that are only slightly too narrow to render it on 1 line should have 2 lines.}
+Input:
+@racketblock{@(expr-to-strings EXPR (- (get-width EXPR-ONE-LINE-LIST) 1))
+}
+Expected Output:
+@racketblock{@EXPR-TWO-LINE-LIST
+}
+Expected Output Value:
+@racketblock{@("(+ (* 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20)"
+ "   (* 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20))")
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{An image of EXPR created with bounds that are only slightly too narrow to render it on 2 lines should have 21 lines.}
+Input:
+@racketblock{@(expr-to-strings EXPR (- (get-width EXPR-TWO-LINE-LIST) 1))
+}
+Expected Output:
+@racketblock{@EXPR-21-LINE-LIST
+}
+Expected Output Value:
+@racketblock{@("(+ (* 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20)"
+ "   (* 1"
+ "      2"
+ "      3"
+ "      4"
+ "      5"
+ "      6"
+ "      7"
+ "      8"
+ "      9"
+ "      10"
+ "      11"
+ "      12"
+ "      13"
+ "      14"
+ "      15"
+ "      16"
+ "      17"
+ "      18"
+ "      19"
+ "      20))")
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{An image of EXPR created with bounds that are only slightly too narrow to render it on 21 lines should have 40 lines.}
+Input:
+@racketblock{@(expr-to-strings EXPR (- (get-width EXPR-21-LINE-LIST) 1))
+}
+Expected Output:
+@racketblock{@EXPR-MAX-LINE-LIST
+}
+Expected Output Value:
+@racketblock{@("(+ (* 1"
+ "      2"
+ "      3"
+ "      4"
+ "      5"
+ "      6"
+ "      7"
+ "      8"
+ "      9"
+ "      10"
+ "      11"
+ "      12"
+ "      13"
+ "      14"
+ "      15"
+ "      16"
+ "      17"
+ "      18"
+ "      19"
+ "      20)"
+ "   (* 1"
+ "      2"
+ "      3"
+ "      4"
+ "      5"
+ "      6"
+ "      7"
+ "      8"
+ "      9"
+ "      10"
+ "      11"
+ "      12"
+ "      13"
+ "      14"
+ "      15"
+ "      16"
+ "      17"
+ "      18"
+ "      19"
+ "      20))")
+}
+Correct
+@subsubsection{Test (error)}
+
+@para{Trying to render EXPR in less than minimal possible width will result in error}
+Input:
+@racketblock{@(expr-to-strings EXPR (- (get-width EXPR-MAX-LINE-LIST) 1))
+}
+Expected Error should match:
+@racketblock{@check-not-enough-room
+}
+Correct
+@section{Results}
+Successes: 35
+@linebreak{} Wrong Outputs: 1
+@linebreak{} Errors: 0
+@linebreak{} Achieved Points: 14.5
+@linebreak{} Total Points (rounded): 14.0/15

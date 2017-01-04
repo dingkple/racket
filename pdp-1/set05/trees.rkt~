@@ -1,0 +1,163 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname trees) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
+
+(require "extras.rkt")
+(require rackunit)
+(require 2htdp/universe)
+(require 2htdp/image)
+
+(define CANVAS-WIDTH 400)
+(define CANVAS-HEIGHT 400)
+(define EMPTY-CANVAS (empty-scene CANVAS-WIDTH CANVAS-HEIGHT))
+(define RATE 0.25)
+(define INI-RX (/ CANVAS-WIDTH 2))
+(define INI-RY (/ CANVAS-HEIGHT 3))
+(define RECT-SIZE 20)
+(define OL-NODE (rectangle RECT-SIZE RECT-SIZE "outline" "green"))
+(define SL-NODE (rectangle RECT-SIZE RECT-SIZE "solid" "green"))
+(define NODES-SPACE-HEIGHT 60)
+(define NODES-SPACE-WIDTH 40)
+
+(define ZERO 0)
+(define NONE -1)
+
+(define-struct node (name children))
+
+
+(define-struct world (root selected boundary nodeNum rx ry))
+
+(define (initial-world x)
+	(make-world empty -1 0 0 INI-RX INI-RY))
+
+(define (run x)
+	(big-bang (initial-world ZERO)
+			  (on-tick world-after-tick RATE)
+			  (on-draw world-to-scene)
+			  (on-key world-after-key-event)
+			  (on-mouse world-after-mouse-event)))
+
+(define (world-after-key-event w kev)
+	(cond
+		[(key=? kev "t") (world-after-t-key w)]
+		; [(key=? kev "n") (world-after-n-key w)]
+		; [(key=? kev "d") (world-after-d-key w)]
+		; [(key=? kev "u") (world-after-u-key w)]
+		[else w]))
+
+
+; (1 (2 3 4))
+
+; (2 (5 6 7 8))
+
+(define n1 (make-node 1 empty))
+(define n2 (make-node 2 empty))
+(define n3 (make-node 3 empty))
+
+(define n4 (make-node 4 (list n1 n2 n3)))
+(define n5 (make-node 5 (list n4)))
+(define n6 (make-node 6 empty))
+(define n5-t (make-node 5 (list n6 n4)))
+
+(define (initial-node x)
+	(make-node x empty))
+
+(define w1 (make-world n5 5 0 5 INI-RX INI-RY))
+(define w1-t (make-world n5-t 5 0 6 INI-RX INI-RY))
+
+(define (check-node aNode aNodeName newName)
+ (if (= (node-name aNode) aNodeName)
+		(make-node (node-name aNode)
+				   (cons (initial-node newName) (node-children aNode) ))
+		(make-node (node-name aNode) 
+				   (add-node-to-selected (node-children aNode) aNodeName))))
+
+
+(define (add-node-to-selected lon aNodeName newName)
+	(cond
+		[(empty? lon) empty]
+		[else (cons (check-node (first lon) aNodeName newName)
+ 					(add-node-to-selected (rest lon) aNodeName newName))]))
+
+
+(define (world-after-mouse-event w mx my kev)
+	(cond
+		[(key=? kev "button-down") (world-after-button-down w mx my)]
+		[(key=? kev "button-up") (world-after-button-up w)]
+		[else w]))
+
+(define (world-after-t-key w)
+	(if (not (= (world-selected w) NONE))
+		(world-after-t-key-helper w)
+		w))
+
+(define (world-after-t-key-helper w)
+	(make-world (check-node (world-root w) (world-selected w) (+ (world-nodeNum w) 1))
+				(world-selected w)
+				(world-boundary w)
+				(+ (world-nodeNum w) 1)
+				(world-rx w)
+				(world-ry w)))
+
+(define (draw-node aNode x y selected scene)
+	(if (= selected (node-name aNode))
+		(place-image SL-NODE
+					 x
+					 y
+					 (draw-children (node-children aNode)
+					 				 x 
+					 				 (+ y NODES-SPACE-HEIGHT) 
+					 				 aNode
+					 				 scene))
+		(place-image OL-NODE
+					 x
+					 y
+					 (draw-children (node-children aNode)
+					 				x
+					 				(+ y NODES-SPACE-HEIGHT)
+					 				selected
+					 				scene))))
+
+(define (draw-children lon x y selected scene)
+	(cond
+		[(empty? lon) scene]
+		[else (draw-node (first lon)
+						 x
+						 y
+						 selected
+						 (draw-children (rest lon)
+						 				(- x NODES-SPACE-WIDTH)
+						 				y
+						 				selected
+						 				scene))]))
+
+
+(define (world-to-scene w)
+	(if (> (world-nodeNum w) 0)
+		(draw-node (world-root w)
+				   INI-RX
+				   INI-RY
+				   (world-selected w)
+				   EMPTY-CANVAS)
+		EMPTY-CANVAS))
+
+
+(define (world-after-tick w)
+	w)
+
+(define (world-after-button-down w mx my)
+	w)
+
+(define (world-after-button-up w)
+	w)
+
+(begin-for-test
+	(check-equal? (world-after-t-key w1)
+	              w1-t
+	              ""))
+
+
+
+
+
+

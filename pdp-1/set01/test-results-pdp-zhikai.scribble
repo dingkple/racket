@@ -1,0 +1,282 @@
+#lang scribble/base
+@(require scribble/manual)
+@title{CS5010 - Problem Set 01 - Test Results}
+@author{pdp-zhikai}
+This test suite tests your implementation of Problem Set 01
+@section{File: robots.rkt}
+This week, automated tests will test your question 01
+@para{Common Definitions}
+
+@racketblock{@(define INITIAL-ROBOT (initial-robot 100 200))
+}@racketblock{@(define ROBOT-WEST (robot-left INITIAL-ROBOT))
+}@racketblock{@(define ROBOT-EAST (robot-right INITIAL-ROBOT))
+}@racketblock{@(define ROBOT-SOUTH (robot-left ROBOT-WEST))
+}@racketblock{@(define ROBOT-RIGHT-WALL (robot-right (initial-robot 185 200)))
+}@racketblock{@(define ROBOT-LEFT-WALL (robot-left (initial-robot 15 200)))
+}@racketblock{@(define ROBOT-TOP-WALL (initial-robot 100 15))
+}@racketblock{@(define ROBOT-BOTTOM-WALL
+  (robot-left (robot-left (initial-robot 100 385))))
+}@racketblock{@(define ROBOT-BEYOND-LEFT-FACE-RIGHT
+  (robot-right (initial-robot -100 200)))
+}@racketblock{@(define ROBOT-BEYOND-RIGHT-FACE-LEFT
+  (robot-left (initial-robot 300 200)))
+}@racketblock{@(define ROBOT-BEYOND-TOP-FACE-DOWN
+  (robot-right (robot-right (initial-robot 100 -100))))
+}@racketblock{@(define ROBOT-BEYOND-BOTTOM-FACE-UP (initial-robot 100 500))
+}
+
+@subsection{Test-Group: initial-robot (1 Points)}
+@margin-note[#:left? #t]{1/1}
+Tests whether the initial robot is correct
+@subsubsection{Test (equality)}
+
+@para{The initial robot should be facing north}
+Input:
+@racketblock{@(robot-north? (initial-robot 100 200))
+}
+Expected Output:
+@racketblock{@true
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsection{Test-Group: robot-left (2 Points)}
+@margin-note[#:left? #t]{2/2}
+Tests basic implementation of robot-left
+@subsubsection{Test (equality)}
+
+@para{A robot facing north will face west when turned left.}
+Input:
+@racketblock{@(robot-west? (robot-left INITIAL-ROBOT))
+}
+Expected Output:
+@racketblock{@true
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{A robot facing west will face south when turned left.}
+Input:
+@racketblock{@(robot-south? (robot-left ROBOT-WEST))
+}
+Expected Output:
+@racketblock{@true
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{A robot facing south will face east when turned left.}
+Input:
+@racketblock{@(robot-east? (robot-left ROBOT-SOUTH))
+}
+Expected Output:
+@racketblock{@true
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{A robot facing east will face north when turned left.}
+Input:
+@racketblock{@(robot-north? (robot-left ROBOT-EAST))
+}
+Expected Output:
+@racketblock{@true
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsection{Test-Group: robot-right (2 Points)}
+@margin-note[#:left? #t]{2/2}
+Tests basic implementation of robot-right
+@subsubsection{Test (equality)}
+
+@para{A robot facing north will face east when turned right.}
+Input:
+@racketblock{@(robot-east? (robot-right INITIAL-ROBOT))
+}
+Expected Output:
+@racketblock{@true
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{A robot facing west will face north when turned right.}
+Input:
+@racketblock{@(robot-north? (robot-right ROBOT-WEST))
+}
+Expected Output:
+@racketblock{@true
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{A robot facing south will face west when turned right.}
+Input:
+@racketblock{@(robot-west? (robot-right ROBOT-SOUTH))
+}
+Expected Output:
+@racketblock{@true
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{A robot facing east will face south when turned right.}
+Input:
+@racketblock{@(robot-south? (robot-right ROBOT-EAST))
+}
+Expected Output:
+@racketblock{@true
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsection{Test-Group: robot-forward (5 Points)}
+@margin-note[#:left? #t]{5/5}
+Tests basic implementation of robot-forward
+@subsubsection{Test (equality, 1 partial points)}
+
+@para{A robot facing north and moving forward should stop at the top wall.}
+Input:
+@racketblock{@(robot-forward (initial-robot 100 200) 300)
+}
+Expected Output:
+@racketblock{@ROBOT-TOP-WALL
+}
+Expected Output Value:
+@racketblock{@#(struct:robot 100 15 0)
+}
+Correct
+@subsubsection{Test (equality, 1 partial points)}
+
+@para{A robot facing west and moving forward should stop at the west wall.}
+Input:
+@racketblock{@(robot-forward ROBOT-WEST 200)
+}
+Expected Output:
+@racketblock{@ROBOT-LEFT-WALL
+}
+Expected Output Value:
+@racketblock{@#(struct:robot 15 200 3)
+}
+Correct
+@subsubsection{Test (equality, 1 partial points)}
+
+@para{A robot facing east and moving forward should stop at the east wall.}
+Input:
+@racketblock{@(robot-forward ROBOT-EAST 200)
+}
+Expected Output:
+@racketblock{@ROBOT-RIGHT-WALL
+}
+Expected Output Value:
+@racketblock{@#(struct:robot 185 200 1)
+}
+Correct
+@subsubsection{Test (equality, 1 partial points)}
+
+@para{A robot facing south and moving forward should stop at the south wall.}
+Input:
+@racketblock{@(robot-forward ROBOT-SOUTH 300)
+}
+Expected Output:
+@racketblock{@ROBOT-BOTTOM-WALL
+}
+Expected Output Value:
+@racketblock{@#(struct:robot 100 385 2)
+}
+Correct
+@subsection{Test-Group: robot-forward (5 Points)}
+@margin-note[#:left? #t]{5/5}
+Tests the one way trap condition for the walls
+@subsubsection{Test (equality, 0.75 partial points)}
+
+@para{A robot beyond the left wall moving forward will enter from outside and stop at right wall.}
+Input:
+@racketblock{@(robot-forward ROBOT-BEYOND-LEFT-FACE-RIGHT 400)
+}
+Expected Output:
+@racketblock{@ROBOT-RIGHT-WALL
+}
+Expected Output Value:
+@racketblock{@#(struct:robot 185 200 1)
+}
+Correct
+@subsubsection{Test (equality, 0.75 partial points)}
+
+@para{A robot beyond the right wall moving forward will enter from outside and stop at left wall.}
+Input:
+@racketblock{@(robot-forward ROBOT-BEYOND-RIGHT-FACE-LEFT 400)
+}
+Expected Output:
+@racketblock{@ROBOT-LEFT-WALL
+}
+Expected Output Value:
+@racketblock{@#(struct:robot 15 200 3)
+}
+Correct
+@subsubsection{Test (equality, 0.75 partial points)}
+
+@para{A robot beyond the top wall moving forward will enter from outside and stop at bottom wall.}
+Input:
+@racketblock{@(robot-forward ROBOT-BEYOND-TOP-FACE-DOWN 600)
+}
+Expected Output:
+@racketblock{@ROBOT-BOTTOM-WALL
+}
+Expected Output Value:
+@racketblock{@#(struct:robot 100 385 2)
+}
+Correct
+@subsubsection{Test (equality, 0.75 partial points)}
+
+@para{A robot beyond the bottom wall moving forward will enter from outside and stop at top wall.}
+Input:
+@racketblock{@(robot-forward ROBOT-BEYOND-BOTTOM-FACE-UP 600)
+}
+Expected Output:
+@racketblock{@ROBOT-TOP-WALL
+}
+Expected Output Value:
+@racketblock{@#(struct:robot 100 15 0)
+}
+Correct
+@subsubsection{Test (equality, 0.75 partial points)}
+
+@para{A robot outside the canvas should not stop at the wall boundary.}
+Input:
+@racketblock{@(robot-forward (robot-right (initial-robot 20 1600)) 1000)
+}
+Expected Output:
+@racketblock{@(robot-right (initial-robot 1020 1600))
+}
+Expected Output Value:
+@racketblock{@#(struct:robot 1020 1600 1)
+}
+Correct
+@section{Results}
+Successes: 18
+@linebreak{} Wrong Outputs: 0
+@linebreak{} Errors: 0
+@linebreak{} Achieved Points: 15
+@linebreak{} Total Points (rounded): 15/15

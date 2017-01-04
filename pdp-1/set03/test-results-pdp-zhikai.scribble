@@ -1,0 +1,1219 @@
+#lang scribble/base
+@(require scribble/manual)
+@title{CS5010 - Problem Set 03 - Test Results}
+@author{pdp-zhikai}
+This test suite tests your implementation of inventory question of Problem Set 03
+@section{File: inventory.rkt}
+This week, we codewalk problem 2
+@para{Common Definitions}
+
+@racketblock{@(define inventory-1
+  (list
+   (make-book
+    15
+    "How to Design Programs"
+    "Felleisen et al."
+    "MIT Press"
+    59
+    49
+    100
+    (make-reorder 2 5)
+    1/12)
+   (make-book
+    16
+    "A Game of Thrones"
+    "George R. R. Martin"
+    "Bantam"
+    12
+    5
+    15
+    (make-empty-reorder 'any)
+    1/20)))
+}@racketblock{@(define inventory-2
+  (list
+   (make-book
+    15
+    "How to Design Programs"
+    "Felleisen et al."
+    "MIT Press"
+    49
+    39
+    2
+    (make-reorder 0 50)
+    1/12)
+   (make-book
+    16
+    "A Game of Thrones"
+    "George R. R. Martin"
+    "Bantam"
+    12
+    5
+    15
+    (make-empty-reorder 'any)
+    1/20)))
+}@racketblock{@(define line-item-1 (make-line-item 15 3))
+}@racketblock{@(define order-1 (list line-item-1))
+}@racketblock{@(define order-2 (list (make-line-item 42 1)))
+}
+
+@subsection{Test-Group: Required Functions (2 Points)}
+@margin-note[#:left? #t]{2/2}
+Basic tests for the required functions not tested below
+@subsubsection{Test (equality)}
+
+@para{The total profit of an empty inventory should be 0}
+Input:
+@racketblock{@(inventory-potential-profit empty)
+}
+Expected Output:
+@racketblock{@0
+}
+Expected Output Value:
+@racketblock{@0
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{The total profit of inventory-1 should be (100 * 10 + 15 * 7)}
+Input:
+@racketblock{@(inventory-potential-profit inventory-1)
+}
+Expected Output:
+@racketblock{@(+ (* 100 10) (* 15 7))
+}
+Expected Output Value:
+@racketblock{@1105
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{The total volume of an empty inventory should be 0}
+Input:
+@racketblock{@(inventory-total-volume empty)
+}
+Expected Output:
+@racketblock{@0
+}
+Expected Output Value:
+@racketblock{@0
+}
+Correct
+@subsubsection{Test (equality, 0.2 partial points)}
+
+@para{The total volume of inventory-1 should be (100 / 12 + 15 / 20)}
+Input:
+@racketblock{@(inventory-total-volume inventory-1)
+}
+Expected Output:
+@racketblock{@(+ (* 100 1/12) (* 15 1/20))
+}
+Expected Output Value:
+@racketblock{@109/12
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{For an empty inventory, price-for-line-item should return false}
+Input:
+@racketblock{@(price-for-line-item empty line-item-1)
+}
+Expected Output:
+@racketblock{@false
+}
+Expected Output Value:
+@racketblock{@#f
+}
+Correct
+@subsubsection{Test (equality, 0.2 partial points)}
+
+@para{The price for line-item-1 in inventory-1 should be 3*59}
+Input:
+@racketblock{@(price-for-line-item inventory-1 line-item-1)
+}
+Expected Output:
+@racketblock{@(* 59 3)
+}
+Expected Output Value:
+@racketblock{@177
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{An empty inventory can not fill a non-empty order}
+Input:
+@racketblock{@(fillable-now? order-1 empty)
+}
+Expected Output:
+@racketblock{@false
+}
+Expected Output Value:
+@racketblock{@#f
+}
+Correct
+@subsubsection{Test (equality, 0.2 partial points)}
+
+@para{inventory-1 should be able to fill order-1}
+Input:
+@racketblock{@(fillable-now? order-1 inventory-1)
+}
+Expected Output:
+@racketblock{@true
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsubsection{Test (equality, 0.1 partial points)}
+
+@para{An inventory cannot fill an order where it has not enough books on hand}
+Input:
+@racketblock{@(fillable-now? order-1 inventory-2)
+}
+Expected Output:
+@racketblock{@false
+}
+Expected Output Value:
+@racketblock{@#f
+}
+Correct
+@subsubsection{Test (equality, 0.1 partial points)}
+
+@para{An inventory cannot fill an order that contains books that are not in the inventory}
+Input:
+@racketblock{@(fillable-now? order-2 inventory-1)
+}
+Expected Output:
+@racketblock{@false
+}
+Expected Output Value:
+@racketblock{@#f
+}
+Correct
+@subsubsection{Test (equality, 0.1 partial points)}
+
+@para{The price of an order should be the sum of the prices of the line items}
+Input:
+@racketblock{@(price-for-order inventory-1 order-1)
+}
+Expected Output:
+@racketblock{@(* 3 59)
+}
+Expected Output Value:
+@racketblock{@177
+}
+Correct
+@subsubsection{Test (equality, 0.1 partial points)}
+
+@para{The price of an order should be the sum of the prices of the line items}
+Input:
+@racketblock{@(price-for-order inventory-2 order-1)
+}
+Expected Output:
+@racketblock{@(* 3 49)
+}
+Expected Output Value:
+@racketblock{@147
+}
+Correct
+@subsection{Test-Group: days-til-fillable (2 Points)}
+@margin-note[#:left? #t]{1.0/2}
+More detailed tests for days-til-fillable
+@subsubsection{Test (equality)}
+
+@para{An empty inventory can never fill a non-empty order}
+Input:
+@racketblock{@(days-til-fillable order-1 empty)
+}
+Expected Output:
+@racketblock{@false
+}
+Expected Output Value:
+@racketblock{@#f
+}
+Error occured when calculating result
+@para{"error: contract violation\n  expected: (or/c string? symbol?)\n  given: (exn:fail:contract \"book-stock_number: contract violation\\n  expected: book?\\n  given: #f\" #<continuation-mark-set>)"}
+@subsubsection{Test (equality, 0.5 partial points)}
+
+@para{inventory-1 should be able to fill order-1 immediately}
+Input:
+@racketblock{@(days-til-fillable order-1 inventory-1)
+}
+Expected Output:
+@racketblock{@0
+}
+Expected Output Value:
+@racketblock{@0
+}
+Correct
+@subsubsection{Test (or, 0.5 partial points)}
+
+@para{This is a tricky detail, so we also accept a slightly wrong interpretation}
+@subsubsub*section{Test (equality)}
+
+@para{inventory-2 should be able to fill order-1 tomorrow}
+Input:
+@racketblock{@(days-til-fillable order-1 inventory-2)
+}
+Expected Output:
+@racketblock{@1
+}
+Expected Output Value:
+@racketblock{@1
+}
+Wrong Output:
+@racketblock{@0
+}
+@subsubsub*section{Test (equality)}
+
+@para{It is also okay to say that inventory-2 should be able to fill order-1 today}
+Input:
+@racketblock{@(days-til-fillable order-1 inventory-2)
+}
+Expected Output:
+@racketblock{@0
+}
+Expected Output Value:
+@racketblock{@0
+}
+Correct
+@subsection{Test-Group: inventory-after-order (3 Points)}
+@margin-note[#:left? #t]{1/3}
+More detailed tests for inventory-after-order
+@para{Common Definitions}
+
+@racketblock{@(define inventory-1-after-order-1
+  (list
+   (make-book
+    15
+    "How to Design Programs"
+    "Felleisen et al."
+    "MIT Press"
+    59
+    49
+    97
+    (make-reorder 2 5)
+    1/12)
+   (make-book
+    16
+    "A Game of Thrones"
+    "George R. R. Martin"
+    "Bantam"
+    12
+    5
+    15
+    (make-empty-reorder 'any)
+    1/20)))
+}@racketblock{@(define order-3 (list line-item-1 (make-line-item 16 5)))
+}@racketblock{@(define inventory-1-after-order-3
+  (list
+   (make-book
+    15
+    "How to Design Programs"
+    "Felleisen et al."
+    "MIT Press"
+    59
+    49
+    97
+    (make-reorder 2 5)
+    1/12)
+   (make-book
+    16
+    "A Game of Thrones"
+    "George R. R. Martin"
+    "Bantam"
+    12
+    5
+    10
+    (make-empty-reorder 'any)
+    1/20)))
+}
+
+@subsubsection{Test (equality, 0.5 partial points)}
+
+@para{An empty order should leave the inventory unchanged}
+Input:
+@racketblock{@(inventory-after-order inventory-1 empty)
+}
+Expected Output:
+@racketblock{@inventory-1
+}
+Expected Output Value:
+@racketblock{@(#(struct:book
+   15
+   "How to Design Programs"
+   "Felleisen et al."
+   "MIT Press"
+   59
+   49
+   100
+   #(struct:reorder 2 5)
+   1/12)
+ #(struct:book
+   16
+   "A Game of Thrones"
+   "George R. R. Martin"
+   "Bantam"
+   12
+   5
+   15
+   #f
+   1/20))
+}
+Wrong Output:
+@racketblock{@()
+}
+@subsubsection{Test (equality, 0.5 partial points)}
+
+@para{After processing order-1, inventory-1 should have three books (of ISBN 15) less in stock}
+Input:
+@racketblock{@(inventory-after-order inventory-1 order-1)
+}
+Expected Output:
+@racketblock{@inventory-1-after-order-1
+}
+Expected Output Value:
+@racketblock{@(#(struct:book
+   15
+   "How to Design Programs"
+   "Felleisen et al."
+   "MIT Press"
+   59
+   49
+   97
+   #(struct:reorder 2 5)
+   1/12)
+ #(struct:book
+   16
+   "A Game of Thrones"
+   "George R. R. Martin"
+   "Bantam"
+   12
+   5
+   15
+   #f
+   1/20))
+}
+Wrong Output:
+@racketblock{@(#(struct:book
+   15
+   "How to Design Programs"
+   "Felleisen et al."
+   "MIT Press"
+   59
+   49
+   97
+   #(struct:reorder 2 5)
+   1/12))
+}
+@subsubsection{Test (equality, 1 partial points)}
+
+@para{After processing order-3, inventory-2 should have three books less of ISBN 15 and 5 books less of ISBN 16.}
+Input:
+@racketblock{@(inventory-after-order inventory-1 order-3)
+}
+Expected Output:
+@racketblock{@inventory-1-after-order-3
+}
+Expected Output Value:
+@racketblock{@(#(struct:book
+   15
+   "How to Design Programs"
+   "Felleisen et al."
+   "MIT Press"
+   59
+   49
+   97
+   #(struct:reorder 2 5)
+   1/12)
+ #(struct:book
+   16
+   "A Game of Thrones"
+   "George R. R. Martin"
+   "Bantam"
+   12
+   5
+   10
+   #f
+   1/20))
+}
+Correct
+@subsection{Test-Group: increase-prices (2 Points)}
+@margin-note[#:left? #t]{2/2}
+More detailed tests for increase-prices
+@para{Common Definitions}
+
+@racketblock{@(define inventory-1-after-increase
+  (list
+   (make-book
+    15
+    "How to Design Programs"
+    "Felleisen et al."
+    "MIT Press"
+    59
+    49
+    100
+    (make-reorder 2 5)
+    1/12)
+   (make-book
+    16
+    "A Game of Thrones"
+    "George R. R. Martin"
+    "Bantam"
+    15
+    5
+    15
+    (make-empty-reorder 'any)
+    1/20)))
+}@racketblock{@(define inventory-3
+  (cons
+   (make-book
+    14
+    "A Storm of Swords"
+    "George R. R. Martin"
+    "Bantam"
+    20
+    5
+    3
+    (make-empty-reorder 'test)
+    1/20)
+   inventory-1))
+}@racketblock{@(define inventory-3-after-increase
+  (cons
+   (make-book
+    14
+    "A Storm of Swords"
+    "George R. R. Martin"
+    "Bantam"
+    25
+    5
+    3
+    (make-empty-reorder 'test)
+    1/20)
+   inventory-1-after-increase))
+}
+
+@subsubsection{Test (equality)}
+
+@para{An empty inventory should not change when prices are increased}
+Input:
+@racketblock{@(increase-prices empty "MIT Press" 5)
+}
+Expected Output:
+@racketblock{@empty
+}
+Expected Output Value:
+@racketblock{@()
+}
+Correct
+@subsubsection{Test (equality, 0.5 partial points)}
+
+@para{Only books of the given Publisher should have their prices increased}
+Input:
+@racketblock{@(increase-prices inventory-1 "Bantam" 25)
+}
+Expected Output:
+@racketblock{@inventory-1-after-increase
+}
+Expected Output Value:
+@racketblock{@(#(struct:book
+   15
+   "How to Design Programs"
+   "Felleisen et al."
+   "MIT Press"
+   59
+   49
+   100
+   #(struct:reorder 2 5)
+   1/12)
+ #(struct:book
+   16
+   "A Game of Thrones"
+   "George R. R. Martin"
+   "Bantam"
+   15
+   5
+   15
+   #f
+   1/20))
+}
+Correct
+@subsubsection{Test (equality, 0.5 partial points)}
+
+@para{All books of the given Publisher should have their prices increased}
+Input:
+@racketblock{@(increase-prices inventory-3 "Bantam" 25)
+}
+Expected Output:
+@racketblock{@inventory-3-after-increase
+}
+Expected Output Value:
+@racketblock{@(#(struct:book
+   14
+   "A Storm of Swords"
+   "George R. R. Martin"
+   "Bantam"
+   25
+   5
+   3
+   #f
+   1/20)
+ #(struct:book
+   15
+   "How to Design Programs"
+   "Felleisen et al."
+   "MIT Press"
+   59
+   49
+   100
+   #(struct:reorder 2 5)
+   1/12)
+ #(struct:book
+   16
+   "A Game of Thrones"
+   "George R. R. Martin"
+   "Bantam"
+   15
+   5
+   15
+   #f
+   1/20))
+}
+Correct
+@section{File: balls-in-box.rkt}
+Tests your implementation of Balls in Box
+@para{Common Definitions}
+
+@racketblock{@(define CANVAS-WIDTH 400)
+}@racketblock{@(define CANVAS-HEIGHT 300)
+}@racketblock{@(define CANVAS-HALF-WIDTH (/ CANVAS-WIDTH 2))
+}@racketblock{@(define CANVAS-HALF-HEIGHT (/ CANVAS-HEIGHT 2))
+}@racketblock{@(define BALL-RADIUS 20)
+}@racketblock{@(define world-after-kev
+  (lambda (world kev) (world-after-key-event world kev)))
+}@racketblock{@(define world-after-mev
+  (lambda (world x y mev) (world-after-mouse-event world x y mev)))
+}@racketblock{@(define INITIAL-WORLD (initial-world "TEST"))
+}@racketblock{@(define ONE-BALL-WORLD (world-after-key-event (initial-world 1) "n"))
+}@racketblock{@(define balls-after
+  (lambda (w)
+    (map
+     (lambda (ball)
+       (list
+        (ball-x-pos ball)
+        (ball-y-pos ball)
+        (ball-selected? ball)))
+     (world-balls w))))
+}
+
+@subsection{Test-Group: Basic functionality (1 Points)}
+@margin-note[#:left? #t]{1/1}
+Covers the basic requirement of the problem
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{The initial world should not contain any balls}
+Input:
+@racketblock{@(world-balls INITIAL-WORLD)
+}
+Expected Output:
+@racketblock{@empty
+}
+Expected Output Value:
+@racketblock{@()
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{Pressing 'n' should create a ball}
+Input:
+@racketblock{@(length (world-balls ONE-BALL-WORLD))
+}
+Expected Output:
+@racketblock{@1
+}
+Expected Output Value:
+@racketblock{@1
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{A new ball should appear halfway between the left and right edges}
+Input:
+@racketblock{@(ball-x-pos (first (world-balls ONE-BALL-WORLD)))
+}
+Expected Output:
+@racketblock{@CANVAS-HALF-WIDTH
+}
+Expected Output Value:
+@racketblock{@200
+}
+Wrong Output:
+@racketblock{@225
+}
+@subsubsection{Test (equality)}
+
+@para{Any other key event than 'n' should not change the world}
+Input:
+@racketblock{@(world-after-key-event ONE-BALL-WORLD "w")
+}
+Expected Output:
+@racketblock{@ONE-BALL-WORLD
+}
+Expected Output Value:
+@racketblock{@#(struct:world (#(struct:ball 225 150 0 0 #f)) 1)
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{Additional balls should be visible in the world's ball-list}
+Input:
+@racketblock{@(length (world-balls (world-after-key-event ONE-BALL-WORLD "n")))
+}
+Expected Output:
+@racketblock{@2
+}
+Expected Output Value:
+@racketblock{@2
+}
+Correct
+@subsection{Test-Group: Mouse Events (1/2 Points)}
+@margin-note[#:left? #t]{1/2/1/2}
+The initial world should not change on a mouse event
+@subsubsection{Test (equality)}
+
+@para{World changed on button-down}
+Input:
+@racketblock{@(world-after-mouse-event INITIAL-WORLD 150 100 "button-down")
+}
+Expected Output:
+@racketblock{@INITIAL-WORLD
+}
+Expected Output Value:
+@racketblock{@#(struct:world () 0)
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{World changed on button-up}
+Input:
+@racketblock{@(world-after-mouse-event INITIAL-WORLD 120 200 "button-up")
+}
+Expected Output:
+@racketblock{@INITIAL-WORLD
+}
+Expected Output Value:
+@racketblock{@#(struct:world () 0)
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{World changed on drag}
+Input:
+@racketblock{@(world-after-mouse-event INITIAL-WORLD 0 0 "drag")
+}
+Expected Output:
+@racketblock{@INITIAL-WORLD
+}
+Expected Output Value:
+@racketblock{@#(struct:world () 0)
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{World changed on enter}
+Input:
+@racketblock{@(world-after-mouse-event INITIAL-WORLD 150 100 "enter")
+}
+Expected Output:
+@racketblock{@INITIAL-WORLD
+}
+Expected Output Value:
+@racketblock{@#(struct:world () 0)
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{World changed on leave}
+Input:
+@racketblock{@(world-after-mouse-event INITIAL-WORLD 17 65 "leave")
+}
+Expected Output:
+@racketblock{@INITIAL-WORLD
+}
+Expected Output Value:
+@racketblock{@#(struct:world () 0)
+}
+Correct
+@subsection{Test-Group: Key Events (1/2 Points)}
+@margin-note[#:left? #t]{1/2/1/2}
+The initial world should not change on a key event other than "n"
+@subsubsection{Test (equality)}
+
+@para{World changed on backspace}
+Input:
+@racketblock{@(world-after-key-event INITIAL-WORLD "\b")
+}
+Expected Output:
+@racketblock{@INITIAL-WORLD
+}
+Expected Output Value:
+@racketblock{@#(struct:world () 0)
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{World changed on q}
+Input:
+@racketblock{@(world-after-key-event INITIAL-WORLD "q")
+}
+Expected Output:
+@racketblock{@INITIAL-WORLD
+}
+Expected Output Value:
+@racketblock{@#(struct:world () 0)
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{World changed on space}
+Input:
+@racketblock{@(world-after-key-event INITIAL-WORLD " ")
+}
+Expected Output:
+@racketblock{@INITIAL-WORLD
+}
+Expected Output Value:
+@racketblock{@#(struct:world () 0)
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{World changed on %}
+Input:
+@racketblock{@(world-after-key-event INITIAL-WORLD "%")
+}
+Expected Output:
+@racketblock{@INITIAL-WORLD
+}
+Expected Output Value:
+@racketblock{@#(struct:world () 0)
+}
+Correct
+@subsection{Test-Group: Key events (1 Points)}
+@margin-note[#:left? #t]{1/1}
+Pressing n should spawn a new ball at the center of the canvas
+@para{Common Definitions}
+
+@racketblock{@(define one-world-balls (world-balls ONE-BALL-WORLD))
+}@racketblock{@(define one-ball (first one-world-balls))
+}
+
+@subsubsection{Test (equality)}
+
+@para{There should be only one ball after n was pressed in the initial world}
+Input:
+@racketblock{@(length one-world-balls)
+}
+Expected Output:
+@racketblock{@1
+}
+Expected Output Value:
+@racketblock{@1
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{A new ball should spawn in the center of the canvas}
+Input:
+@racketblock{@(list (ball-x-pos one-ball) (ball-y-pos one-ball))
+}
+Expected Output:
+@racketblock{@(list CANVAS-HALF-WIDTH CANVAS-HALF-HEIGHT)
+}
+Expected Output Value:
+@racketblock{@(200 150)
+}
+Wrong Output:
+@racketblock{@(225 150)
+}
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{A new ball should not be selected}
+Input:
+@racketblock{@(ball-selected? one-ball)
+}
+Expected Output:
+@racketblock{@false
+}
+Expected Output Value:
+@racketblock{@#f
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{If the world already contains some balls, it should still spawn new balls on KeyEvent
+                  n and ignore all other KeyEvents}
+Input:
+@racketblock{@(length
+ (world-balls
+  (world-after-key-event
+   (world-after-key-event
+    (world-after-key-event
+     (world-after-key-event
+      (world-after-key-event
+       (world-after-key-event INITIAL-WORLD "n")
+       "n")
+      "%")
+     "n")
+    "left")
+   "n")))
+}
+Expected Output:
+@racketblock{@4
+}
+Expected Output Value:
+@racketblock{@4
+}
+Correct
+@subsection{Test-Group: Mouse Events (3 Points)}
+@margin-note[#:left? #t]{0/3}
+Tests balls behavior on mouse events
+@para{Common Definitions}
+
+@racketblock{@(define CX-200 (+ CANVAS-HALF-WIDTH 5))
+}@racketblock{@(define CY-150 (+ CANVAS-HALF-HEIGHT 5))
+}@racketblock{@(define ONE-BALL-AFTER-BUTTON-DOWN
+  (world-after-mouse-event
+   ONE-BALL-WORLD
+   CX-200
+   CY-150
+   "button-down"))
+}@racketblock{@(define ONE-BALL-AFTER-DRAG
+  (world-after-mouse-event ONE-BALL-AFTER-BUTTON-DOWN 300 50 "drag"))
+}@racketblock{@(define ONE-BALL-AFTER-BUTTON-UP
+  (world-after-mouse-event ONE-BALL-AFTER-DRAG 300 50 "button-up"))
+}@racketblock{@(define TWO-BALLS-WORLD
+  (world-after-key-event ONE-BALL-AFTER-BUTTON-UP "n"))
+}@racketblock{@(define TWO-BALLS-AFTER-BUTTON-DOWN
+  (world-after-mouse-event
+   TWO-BALLS-WORLD
+   CX-200
+   CY-150
+   "button-down"))
+}@racketblock{@(define TWO-BALLS-AFTER-DRAG
+  (world-after-mouse-event TWO-BALLS-AFTER-BUTTON-DOWN 50 200 "drag"))
+}@racketblock{@(define TWO-BALLS-AFTER-BUTTON-UP
+  (world-after-mouse-event TWO-BALLS-AFTER-DRAG 50 200 "button-up"))
+}@racketblock{@(define OVERLAP-TEST-BUTTON-DOWN
+  (world-after-mouse-event
+   TWO-BALLS-AFTER-BUTTON-UP
+   50
+   200
+   "button-down"))
+}@racketblock{@(define OVERLAP-TEST-DRAG
+  (world-after-mouse-event OVERLAP-TEST-BUTTON-DOWN 300 50 "drag"))
+}@racketblock{@(define multiple-balls
+  (balls-after
+   (world-after-mouse-event
+    (world-after-key-event
+     (world-after-key-event
+      (world-after-key-event
+       (world-after-key-event
+        (world-after-key-event
+         (world-after-key-event INITIAL-WORLD "n")
+         "n")
+        "%")
+       "n")
+      "left")
+     "n")
+    CANVAS-HALF-WIDTH
+    CANVAS-HALF-HEIGHT
+    "button-down")))
+}@racketblock{@(define multiple-balls-selected?
+  (andmap (lambda (ball) (third ball)) multiple-balls))
+}
+
+@subsubsection{Test (equality)}
+
+@para{The ball should be selected but it's position shouldn't change if mouse is not in center!}
+Input:
+@racketblock{@(balls-after ONE-BALL-AFTER-BUTTON-DOWN)
+}
+Expected Output:
+@racketblock{@`(,`(,CANVAS-HALF-WIDTH ,CANVAS-HALF-HEIGHT ,true))
+}
+Expected Output Value:
+@racketblock{@((200 150 #t))
+}
+Wrong Output:
+@racketblock{@((225 150 #f))
+}
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{Mouse relative distance to ball's center should be maintained while dragging the ball}
+Input:
+@racketblock{@(balls-after ONE-BALL-AFTER-DRAG)
+}
+Expected Output:
+@racketblock{@`(,`(,(- 300 5) ,(- 50 5) ,true))
+}
+Expected Output Value:
+@racketblock{@((295 45 #t))
+}
+Wrong Output:
+@racketblock{@((225 150 #f))
+}
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{The ball should be placed in position and gets unselected}
+Input:
+@racketblock{@(balls-after ONE-BALL-AFTER-BUTTON-UP)
+}
+Expected Output:
+@racketblock{@`(,`(,(- 300 5) ,(- 50 5) ,false))
+}
+Expected Output Value:
+@racketblock{@((295 45 #f))
+}
+Wrong Output:
+@racketblock{@((225 150 #f))
+}
+@subsubsection{Test (or)}
+
+@para{}
+@subsubsub*section{Test (equality)}
+
+@para{The second ball should be selected but it's position shouldn't change if mouse is not in center!
+ First ball should not be affected}
+Input:
+@racketblock{@(balls-after TWO-BALLS-AFTER-BUTTON-DOWN)
+}
+Expected Output:
+@racketblock{@`(,`(,CANVAS-HALF-WIDTH ,CANVAS-HALF-HEIGHT ,true)
+  ,`(,(- 300 5) ,(- 50 5) ,false))
+}
+Expected Output Value:
+@racketblock{@((200 150 #t) (295 45 #f))
+}
+Wrong Output:
+@racketblock{@((225 150 #f) (225 150 #f))
+}
+@subsubsub*section{Test (equality)}
+
+@para{The second ball should be selected but it's position shouldn't change if mouse is not in center!
+ First ball should not be affected}
+Input:
+@racketblock{@(balls-after TWO-BALLS-AFTER-BUTTON-DOWN)
+}
+Expected Output:
+@racketblock{@`(,`(,(- 300 5) ,(- 50 5) ,false)
+  ,`(,CANVAS-HALF-WIDTH ,CANVAS-HALF-HEIGHT ,true))
+}
+Expected Output Value:
+@racketblock{@((295 45 #f) (200 150 #t))
+}
+Wrong Output:
+@racketblock{@((225 150 #f) (225 150 #f))
+}
+@subsubsection{Test (or, 1/2 partial points)}
+
+@para{}
+@subsubsub*section{Test (equality)}
+
+@para{The second ball should be selected and dragged along with the mouse!
+Mouse relative distance to ball's center should be maintained while dragging the ball}
+Input:
+@racketblock{@(balls-after TWO-BALLS-AFTER-DRAG)
+}
+Expected Output:
+@racketblock{@`(,`(,(- 50 5) ,(- 200 5) ,true) ,`(,(- 300 5) ,(- 50 5) ,false))
+}
+Expected Output Value:
+@racketblock{@((45 195 #t) (295 45 #f))
+}
+Wrong Output:
+@racketblock{@((225 150 #f) (225 150 #f))
+}
+@subsubsub*section{Test (equality)}
+
+@para{The second ball should be selected and dragged along with the mouse!
+Mouse relative distance to ball's center should be maintained while dragging the ball}
+Input:
+@racketblock{@(balls-after TWO-BALLS-AFTER-DRAG)
+}
+Expected Output:
+@racketblock{@`(,`(,(- 300 5) ,(- 50 5) ,false) ,`(,(- 50 5) ,(- 200 5) ,true))
+}
+Expected Output Value:
+@racketblock{@((295 45 #f) (45 195 #t))
+}
+Wrong Output:
+@racketblock{@((225 150 #f) (225 150 #f))
+}
+@subsubsection{Test (or, 1/2 partial points)}
+
+@para{}
+@subsubsub*section{Test (equality)}
+
+@para{The second ball should be unselected and dropped in the position!}
+Input:
+@racketblock{@(balls-after TWO-BALLS-AFTER-BUTTON-UP)
+}
+Expected Output:
+@racketblock{@`(,`(,(- 50 5) ,(- 200 5) ,false) ,`(,(- 300 5) ,(- 50 5) ,false))
+}
+Expected Output Value:
+@racketblock{@((45 195 #f) (295 45 #f))
+}
+Wrong Output:
+@racketblock{@((225 150 #f) (225 150 #f))
+}
+@subsubsub*section{Test (equality)}
+
+@para{The second ball should be unselected and dropped in the position!}
+Input:
+@racketblock{@(balls-after TWO-BALLS-AFTER-BUTTON-UP)
+}
+Expected Output:
+@racketblock{@`(,`(,(- 300 5) ,(- 50 5) ,false) ,`(,(- 50 5) ,(- 200 5) ,false))
+}
+Expected Output Value:
+@racketblock{@((295 45 #f) (45 195 #f))
+}
+Wrong Output:
+@racketblock{@((225 150 #f) (225 150 #f))
+}
+@subsubsection{Test (or)}
+
+@para{}
+@subsubsub*section{Test (equality)}
+
+@para{The second ball should be selected!}
+Input:
+@racketblock{@(balls-after
+ (world-after-mouse-event
+  TWO-BALLS-AFTER-BUTTON-UP
+  50
+  200
+  "button-down"))
+}
+Expected Output:
+@racketblock{@`(,`(,(- 50 5) ,(- 200 5) ,true) ,`(,(- 300 5) ,(- 50 5) ,false))
+}
+Expected Output Value:
+@racketblock{@((45 195 #t) (295 45 #f))
+}
+Wrong Output:
+@racketblock{@((225 150 #f) (225 150 #f))
+}
+@subsubsub*section{Test (equality)}
+
+@para{The second ball should be selected!}
+Input:
+@racketblock{@(balls-after
+ (world-after-mouse-event
+  TWO-BALLS-AFTER-BUTTON-UP
+  50
+  200
+  "button-down"))
+}
+Expected Output:
+@racketblock{@`(,`(,(- 300 5) ,(- 50 5) ,false) ,`(,(- 50 5) ,(- 200 5) ,true))
+}
+Expected Output Value:
+@racketblock{@((295 45 #f) (45 195 #t))
+}
+Wrong Output:
+@racketblock{@((225 150 #f) (225 150 #f))
+}
+@subsubsection{Test (or, 1/2 partial points)}
+
+@para{}
+@subsubsub*section{Test (equality)}
+
+@para{Overlapping the balls should not affect each others state!}
+Input:
+@racketblock{@(balls-after OVERLAP-TEST-DRAG)
+}
+Expected Output:
+@racketblock{@`(,`(,(- 300 5) ,(- 50 5) ,true) ,`(,(- 300 5) ,(- 50 5) ,false))
+}
+Expected Output Value:
+@racketblock{@((295 45 #t) (295 45 #f))
+}
+Wrong Output:
+@racketblock{@((225 150 #f) (225 150 #f))
+}
+@subsubsub*section{Test (equality)}
+
+@para{Overlapping balls should not affect each others state!}
+Input:
+@racketblock{@(balls-after OVERLAP-TEST-DRAG)
+}
+Expected Output:
+@racketblock{@`(,`(,(- 300 5) ,(- 50 5) ,false) ,`(,(- 300 5) ,(- 50 5) ,true))
+}
+Expected Output Value:
+@racketblock{@((295 45 #f) (295 45 #t))
+}
+Wrong Output:
+@racketblock{@((225 150 #f) (225 150 #f))
+}
+@subsubsection{Test (or)}
+
+@para{}
+@subsubsub*section{Test (equality)}
+
+@para{Dragging the ball shouldn't affect a new ball creation}
+Input:
+@racketblock{@(balls-after (world-after-key-event OVERLAP-TEST-DRAG "n"))
+}
+Expected Output:
+@racketblock{@`(,`(,(- 300 5) ,(- 50 5) ,false)
+  ,`(,(- 300 5) ,(- 50 5) ,true)
+  ,`(,CANVAS-HALF-WIDTH ,CANVAS-HALF-HEIGHT ,false))
+}
+Expected Output Value:
+@racketblock{@((295 45 #f) (295 45 #t) (200 150 #f))
+}
+Wrong Output:
+@racketblock{@((225 150 #f) (225 150 #f) (225 150 #f))
+}
+@subsubsub*section{Test (equality)}
+
+@para{Dragging the ball shouldn't affect a new ball creation}
+Input:
+@racketblock{@(balls-after (world-after-key-event OVERLAP-TEST-DRAG "n"))
+}
+Expected Output:
+@racketblock{@`(,`(,CANVAS-HALF-WIDTH ,CANVAS-HALF-HEIGHT ,false)
+  ,`(,(- 300 5) ,(- 50 5) ,true)
+  ,`(,(- 300 5) ,(- 50 5) ,false))
+}
+Expected Output Value:
+@racketblock{@((200 150 #f) (295 45 #t) (295 45 #f))
+}
+Wrong Output:
+@racketblock{@((225 150 #f) (225 150 #f) (225 150 #f))
+}
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{If there is a button-down event on multiple balls, 
+every ball in the mouse position should be selected}
+Input:
+@racketblock{@multiple-balls-selected?
+}
+Expected Output:
+@racketblock{@true
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Wrong Output:
+@racketblock{@#f
+}
+@section{Results}
+Successes: 34
+@linebreak{} Wrong Outputs: 14
+@linebreak{} Errors: 1
+@linebreak{} Achieved Points: 9.0
+@linebreak{} Total Points (rounded): 9.0/15

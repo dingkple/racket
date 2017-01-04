@@ -1,0 +1,32 @@
+Date	Who		Start	Stop	Interruptions	Question    TimeOnTask	  Comments		
+10/13	ZkD	        12:52	16:44	0		1	    232           almost finished the key event function, mouse event function and world-to-scene 
+                                                                                  function, but need to be tested
+10/13	SFX	        18:48	20:40	10		1	    102		  wrote data definition, contracts and purposes
+============committing to git: 10/13 20:40 ===================
+10/14	ZkD,SFX	        09:00	13:21	15		1	    246		  fixed one bug, including the colors and boundary in the world-to-scene function
+10/14	ZkD,SFX	        13:21	15:46	0		1	    145		  tracked back to last version, ignore the node created outside of bottom edge of the canvas 
+============committing to git: 10/14 15:46 ===================
+10/14	ZkD,SFX	        17:10	19:30	0		1	    140		  finished most of the code, now needed to write tests and docs
+============committing to git: 10/15 19:30 ===================
+10/15	ZkD,SFX	        13:04	14:52	0		1	    108	          finished most of the contracts and purposes, but some codes and examples should be revised
+============committing to git: 10/16 14:52 ===================
+10/16	ZkD,SFX	        09:00	12:36	0		1	    216		  add more tests and reviewed the docs, revised interpretations
+10/16	ZkD,SFX	        13:20	14:42	0		1	    82		  fixed one bug, if click the overlapping area of the root node and its children node, both nodes
+                                                                                  should be selected and dragged together
+============committing to git: 10/16 14:54 ===================
+10/16	ZkD,SFX	        20:00	21:52	0	        1	    112		  added some new helper functions, added more tests and changed some contracts and purposes 
+============committing to git: 10/16 22:00 ===================
+10/17	ZkD,SFX	        09:00	10:52	10		1	    102		  fixed the minor typo and still waiting for the answer about what will happen if we drag root 
+                                                                                  node and it son node 
+============committing to git: 10/17 10:54 ===================
+10/18   ZkD,SFX         18:40   20:30   15              1           95            fixed one bug, we can now add new son to the right area of the root node
+============committing to git: 10/18 20:32 ===================
+10/19   ZkD,SFX         14:20   15:10   5               1           45            revised the contracts and purposed, and wrote notebook
+============committing to git: 10/19 15:15 ===================
+10/20   SFX             00:13   01:04   0               1           51            finally review the code and revise some strategy problems
+============committing to git: 10/20 01:07 ===================             
+10/20   SFX             10:35   10:52   0               1           17            pushed final version
+
+Total Time On Task Q1 (minutes)           1693                   
+TOTQ1 (hours and tenths)                  27.9    
+  

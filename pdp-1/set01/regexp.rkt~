@@ -1,0 +1,45 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname regexp) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
+(require "extras.rkt")
+
+
+(provide initial-state
+         next-state
+         accepting-state?
+         error-state?
+         )
+
+(define-struct fsm (state))
+
+(define (initial-state n)
+  (make-fsm 0)
+  )
+
+(define (input_1 f)
+  (if (or (= (fsm-state f) 0) (= (fsm-state f) 1))
+      (make-fsm 1)
+      (make-fsm -1)
+      ))
+
+(define (input_2 f)
+  (if (or (= (fsm-state f) 1) (= (fsm-state f) 2))
+      (make-fsm 2)
+      (make-fsm -1)))
+
+(define (input_3 f)
+  (if (or (= (fsm-state f) 1) (= (fsm-state f) 2) (= (fsm-state f) 0))
+      (make-fsm 3)
+      (make-fsm -1)
+      ))
+
+
+(define (next-state f input)
+  (cond
+    [(or (string=? input "a") (string=? "b" input)) (input_1 f)]
+    [(or (string=? input "c") (string=? "d" input)) (input_2 f)]
+    [(or (string=? input "e") (string=? "b" input)) (input_3 f)]
+    ))
+
+
+         

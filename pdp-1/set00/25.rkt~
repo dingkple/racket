@@ -1,0 +1,43 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname |25|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
+;; list-length : List -> Number
+;; Returns the length of the given list
+;; Examples: 
+;; (list-length empty) = 0
+;; (list-length (list 1)) = 1
+;; (list-length (list 1 2 3) = 3
+(define (list-length lst)
+  (cond
+    [(empty? lst) 0]
+    [else (+ 1 (list-length (rest lst)))]))
+
+
+;; sum : List -> Number
+;; Returns the sum of the numbers in the given list
+;; Examples: 
+;; (sum empty) = 0
+;; (sum (list 1)) = 1
+;; (sum (list 1 2 3) = 6
+(define (sum lst)
+  (cond
+    [(empty? lst) 0]
+    [else (+ (first lst) (sum (rest lst)))]))
+
+(define (change lst1 lst2)
+  (cond
+    [(empty? lst1) (cons 0 lst2)]
+    [else (if (rest lst1) (cons 0 lst2) (cons 1 lst2))]))
+
+;check_all_true: ListofBoolean -> boolean
+;GIVEN: a ListofBoolean
+;RETURN: a boolean, true if all the item in the list are true, false if not
+;EXAMPLES:
+;  (check_all_true (list true true true)) -> true
+;  (check_all_true (list true true true false)) -> false
+(define (check_all_true lst)
+  (not (> (sum (change lst lst2)) 0)))
+
+
+
+(check_all_true (list false true false true true true true))

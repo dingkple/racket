@@ -1,0 +1,960 @@
+#lang scribble/base
+@(require scribble/manual)
+@title{CS5010 - Problem Set 02 - Test Results}
+@author{pdp-zhikai}
+This test suite tests your implementation of Problem Set 02
+@section{File: two-bouncing-cats.rkt}
+Tests your implementation of Bouncing cats
+@para{Common Definitions}
+
+@racketblock{@(define CANVAS-WIDTH 450)
+}@racketblock{@(define CANVAS-HEIGHT 400)
+}@racketblock{@(define CANVAS-HALF-WIDTH (/ CANVAS-WIDTH 2))
+}@racketblock{@(define CANVAS-HALF-HEIGHT (/ CANVAS-HEIGHT 2))
+}@racketblock{@(define CAT-IMAGE (bitmap "cat.png"))
+}@racketblock{@(define HALF-CAT-WIDTH (/ (image-width CAT-IMAGE) 2))
+}@racketblock{@(define HALF-CAT-HEIGHT (/ (image-height CAT-IMAGE) 2))
+}@racketblock{@(define INITIAL-Y-POS 100)
+}@racketblock{@(define CAT1-X-COORD (/ CANVAS-WIDTH 3))
+}@racketblock{@(define CAT2-X-COORD (* 2 CAT1-X-COORD))
+}@racketblock{@(define INITIAL_WORLD (initial-world INITIAL-Y-POS))
+}@racketblock{@(define RBORDER (- CANVAS-WIDTH HALF-CAT-WIDTH))
+}@racketblock{@(define LBORDER HALF-CAT-WIDTH)
+}@racketblock{@(define BBORDER (- CANVAS-HEIGHT HALF-CAT-HEIGHT))
+}@racketblock{@(define TBORDER HALF-CAT-HEIGHT)
+}@racketblock{@(define cat-1 (lambda (world) (world-cat1 world)))
+}@racketblock{@(define cat-2 (lambda (world) (world-cat2 world)))
+}@racketblock{@(define cat1-posn
+  (lambda (world)
+    (list (cat-x-pos (cat-1 world)) (cat-y-pos (cat-1 world)))))
+}@racketblock{@(define cat2-posn
+  (lambda (world)
+    (list (cat-x-pos (cat-2 world)) (cat-y-pos (cat-2 world)))))
+}@racketblock{@(define get-cat-direction
+  (lambda (cat)
+    (cond
+     ((cat-north? cat) "north")
+     ((cat-south? cat) "south")
+     ((cat-east? cat) "east")
+     ((cat-west? cat) "west"))))
+}@racketblock{@(define get-cats-direction
+  (lambda (world)
+    (list
+     (get-cat-direction (cat-1 world))
+     (get-cat-direction (cat-2 world)))))
+}@racketblock{@(define get-cat
+  (lambda (cat w)
+    (list
+     (cat-x-pos (cat w))
+     (cat-y-pos (cat w))
+     (cat-selected? (cat w))
+     (get-cat-direction (cat w)))))
+}@racketblock{@(define cat-speed
+  (-
+   (cat-y-pos (cat-1 (world-after-tick INITIAL_WORLD)))
+   (cat-y-pos (cat-1 INITIAL_WORLD))))
+}@racketblock{@(define get-cats
+  (lambda (w) `(,(get-cat cat-1 w) ,(get-cat cat-2 w))))
+}@racketblock{@(define simulate-until-at-wall
+  (lambda (cat w)
+    (let ((cat-towards-east? (cat-east? (cat w)))
+          (cat-towards-west? (cat-west? (cat w)))
+          (cat-towards-north? (cat-north? (cat w)))
+          (cat-towards-south? (cat-south? (cat w)))
+          (cat-curr-x (cat-x-pos (cat w)))
+          (cat-curr-y (cat-y-pos (cat w))))
+      (cond
+       ((or (and cat-towards-east? (> cat-curr-x RBORDER))
+            (and cat-towards-west? (< cat-curr-x LBORDER))
+            (and cat-towards-south? (> cat-curr-y BBORDER))
+            (and cat-towards-north? (< cat-curr-y TBORDER)))
+        (error "Moved past the edge"))
+       ((and cat-towards-west?
+             (or (<= 0 (- RBORDER cat-curr-x) 2)
+                 (= cat-curr-x RBORDER)
+                 (= cat-curr-x (- RBORDER 1))))
+        w)
+       ((and cat-towards-east?
+             (or (<= 0 (- cat-curr-x LBORDER) 2)
+                 (= cat-curr-x (+ LBORDER 1))
+                 (= cat-curr-x LBORDER)))
+        w)
+       ((and cat-towards-north?
+             (or (<= 0 (- BBORDER cat-curr-y) 2)
+                 (= cat-curr-y BBORDER)
+                 (= cat-curr-y (- BBORDER 1))))
+        w)
+       ((and cat-towards-south?
+             (or (<= 0 (- cat-curr-y TBORDER) 2)
+                 (= cat-curr-y (+ TBORDER 1))
+                 (= cat-curr-y TBORDER)))
+        w)
+       (else
+        (begin
+          (let* ((after-tick (world-after-tick w))
+                 (cat-next-x (cat-x-pos (cat after-tick)))
+                 (cat-next-y (cat-y-pos (cat after-tick))))
+            (if (or (and cat-towards-east? (> cat-next-x cat-curr-x))
+                    (and cat-towards-west? (< cat-next-x cat-curr-x))
+                    (and cat-towards-south? (> cat-next-y cat-curr-y))
+                    (and cat-towards-north?
+                         (< cat-next-y cat-curr-y)))
+              (if (or (equal?
+                       (abs (- cat-next-x cat-curr-x))
+                       cat-speed)
+                      (equal?
+                       (abs (- cat-next-y cat-curr-y))
+                       cat-speed)
+                      (<= 0 (- RBORDER cat-next-x) 2)
+                      (<= 0 (- cat-next-x LBORDER) 2)
+                      (<= 0 (- BBORDER cat-next-y) 2)
+                      (<= 0 (- cat-next-y TBORDER) 2))
+                (begin (simulate-until-at-wall cat after-tick))
+                (error "Does not move at full speed when it should"))
+              (error "Does not move towards correct wall")))))))))
+}@racketblock{@(define world-after-kev
+  (lambda (world kev) (world-after-key-event world kev)))
+}@racketblock{@(define world-after-mev
+  (lambda (world x y mev) (world-after-mouse-event world x y mev)))
+}@racketblock{@(define CX (+ CANVAS-HALF-WIDTH 50))
+}@racketblock{@(define CY (+ CANVAS-HALF-HEIGHT 50))
+}@racketblock{@(define change-dir
+  (lambda (world cat mx my key)
+    (let* ((select-cat
+            (world-after-mev
+             world
+             (+ (cat-x-pos (cat INITIAL_WORLD)) 10)
+             (+ (cat-y-pos (cat INITIAL_WORLD)) 10)
+             "button-down"))
+           (drag-cat (world-after-mev select-cat mx my "drag"))
+           (cat-after-key (world-after-kev drag-cat key))
+           (release-cat
+            (world-after-mev cat-after-key mx my "button-up")))
+      release-cat)))
+}
+
+@subsection{Test-Group: Basic Cats behavior (2 Points)}
+@margin-note[#:left? #t]{2/2}
+
+@para{Common Definitions}
+
+@racketblock{@(define INITWORLD-AFTER-A-TICK (world-after-tick INITIAL_WORLD))
+}
+
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{The cats should be created in given initial y position}
+Input:
+@racketblock{@(get-cats INITIAL_WORLD)
+}
+Expected Output:
+@racketblock{@`(,`(,CAT1-X-COORD ,INITIAL-Y-POS ,false ,"south")
+  ,`(,CAT2-X-COORD ,INITIAL-Y-POS ,false ,"south"))
+}
+Expected Output Value:
+@racketblock{@((150 100 #f "south") (300 100 #f "south"))
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{The cats should fall at specified speed}
+Input:
+@racketblock{@(get-cats INITWORLD-AFTER-A-TICK)
+}
+Expected Output:
+@racketblock{@`(,`(,CAT1-X-COORD ,(+ INITIAL-Y-POS cat-speed) ,false ,"south")
+  ,`(,CAT2-X-COORD ,(+ INITIAL-Y-POS cat-speed) ,false ,"south"))
+}
+Expected Output Value:
+@racketblock{@((150 108 #f "south") (300 108 #f "south"))
+}
+Correct
+@subsubsection{Test (or, 1 partial points)}
+
+@para{The cat should bounce, once it reaches the bottom}
+@subsubsub*section{Test (equality)}
+
+@para{The cat should bounce once it reaches the bottom all threshold}
+Input:
+@racketblock{@(<=
+ 0
+ (-
+  BBORDER
+  (second
+   (get-cat
+    cat-1
+    (simulate-until-at-wall cat-1 INITWORLD-AFTER-A-TICK))))
+ 2)
+}
+Expected Output:
+@racketblock{@true
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsubsub*section{Test (equality)}
+
+@para{The cat should bounce, once it reaches the bottom no threshold}
+Input:
+@racketblock{@(get-cat cat-1 (simulate-until-at-wall cat-1 INITWORLD-AFTER-A-TICK))
+}
+Expected Output:
+@racketblock{@`(,CAT1-X-COORD ,BBORDER ,false ,"north")
+}
+Expected Output Value:
+@racketblock{@(150 683/2 #f "north")
+}
+Wrong Output:
+@racketblock{@(150 679/2 #f "north")
+}
+@subsubsub*section{Test (equality)}
+
+@para{The cat should bounce, once it reaches the bottom threshold 2}
+Input:
+@racketblock{@(get-cat cat-1 (simulate-until-at-wall cat-1 INITWORLD-AFTER-A-TICK))
+}
+Expected Output:
+@racketblock{@`(,CAT1-X-COORD ,(- BBORDER 2) ,false ,"north")
+}
+Expected Output Value:
+@racketblock{@(150 679/2 #f "north")
+}
+Correct
+@subsubsub*section{Test (equality)}
+
+@para{The cat should bounce, once it reaches the bottom threshold 1}
+Input:
+@racketblock{@(get-cat cat-1 (simulate-until-at-wall cat-1 INITWORLD-AFTER-A-TICK))
+}
+Expected Output:
+@racketblock{@`(,CAT1-X-COORD ,(- BBORDER 1) ,false ,"north")
+}
+Expected Output Value:
+@racketblock{@(150 681/2 #f "north")
+}
+Wrong Output:
+@racketblock{@(150 679/2 #f "north")
+}
+@subsection{Test-Group: Dragging Cat(s) (5 Points)}
+@margin-note[#:left? #t]{5/5}
+These tests will check behavior of cats after mouse events
+@para{Common Definitions}
+
+@racketblock{@(define WORLD-AFTER-MEV-BD-1
+  (world-after-mev
+   INITIAL_WORLD
+   (/ CANVAS-WIDTH 2)
+   (/ CANVAS-HEIGHT 2)
+   "button-down"))
+}@racketblock{@(define WORLD-AFTER-MEV-BD-2
+  (world-after-mev
+   INITIAL_WORLD
+   (+ (cat-x-pos (cat-1 INITIAL_WORLD)) 15)
+   (+ (cat-y-pos (cat-1 INITIAL_WORLD)) 15)
+   "button-down"))
+}@racketblock{@(define WORLD-AFTER-MEV-DRAG
+  (world-after-mev WORLD-AFTER-MEV-BD-2 CX CY "drag"))
+}@racketblock{@(define WORLD-AFTER-MEV-BU
+  (world-after-mev WORLD-AFTER-MEV-DRAG CX CY "button-up"))
+}@racketblock{@(define WORLD-AFTER-MEV-BD-3
+  (world-after-mev
+   WORLD-AFTER-MEV-BU
+   (+ CAT2-X-COORD 15)
+   (- (cat-y-pos (cat-2 WORLD-AFTER-MEV-BU)) 10)
+   "button-down"))
+}@racketblock{@(define WORLD-AFTER-MEV-DRAG-2
+  (world-after-mev WORLD-AFTER-MEV-BD-3 CX CY "drag"))
+}@racketblock{@(define WORLD-AFTER-MEV-DRAG-RBORDER
+  (world-after-mev WORLD-AFTER-MEV-DRAG-2 RBORDER CY "drag"))
+}@racketblock{@(define WORLD-AFTER-MEV-BU-RBORDER
+  (world-after-mev
+   WORLD-AFTER-MEV-DRAG-RBORDER
+   RBORDER
+   CY
+   "button-up"))
+}@racketblock{@(define WORLD-AFTER-SELECTING-BOTH-CATS
+  (world-after-mev WORLD-AFTER-MEV-DRAG-2 CX CY "button-down"))
+}@racketblock{@(define WORLD-AFTER-DRAGGING-BOTH-CATS
+  (world-after-mev
+   WORLD-AFTER-SELECTING-BOTH-CATS
+   (+ CX 50)
+   (+ CY 50)
+   "drag"))
+}@racketblock{@(define WORLD-AFTER-DROPPING-BOTH-CATS
+  (world-after-mev
+   WORLD-AFTER-DRAGGING-BOTH-CATS
+   (+ CX 50)
+   (+ CY 50)
+   "button-up"))
+}@racketblock{@(define WORLD-AFTER-MEV-DRAG-CAT2
+  (world-after-mev WORLD-AFTER-SELECTING-BOTH-CATS CX CY "drag"))
+}
+
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{The cats should not get selected if button down occurs outside them}
+Input:
+@racketblock{@(get-cats WORLD-AFTER-MEV-BD-1)
+}
+Expected Output:
+@racketblock{@`(,`(,CAT1-X-COORD
+     ,(cat-y-pos (cat-1 WORLD-AFTER-MEV-BD-1))
+     ,false
+     ,"south")
+  ,`(,CAT2-X-COORD
+     ,(cat-y-pos (cat-2 WORLD-AFTER-MEV-BD-1))
+     ,false
+     ,"south"))
+}
+Expected Output Value:
+@racketblock{@((150 100 #f "south") (300 100 #f "south"))
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{The cat should be selected on button down, only if the mouse is inside it.
+It's position and direction should not change on button down. Other cat should not be affected}
+Input:
+@racketblock{@(get-cats WORLD-AFTER-MEV-BD-2)
+}
+Expected Output:
+@racketblock{@`(,`(,CAT1-X-COORD
+     ,(cat-y-pos (cat-1 WORLD-AFTER-MEV-BD-1))
+     ,true
+     ,"south")
+  ,`(,CAT2-X-COORD
+     ,(cat-y-pos (cat-2 WORLD-AFTER-MEV-BD-1))
+     ,false
+     ,"south"))
+}
+Expected Output Value:
+@racketblock{@((150 100 #t "south") (300 100 #f "south"))
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{The cat's position should change when it is dragged but its direction shouldn't change
+Other cat should not be affected}
+Input:
+@racketblock{@(get-cats WORLD-AFTER-MEV-DRAG)
+}
+Expected Output:
+@racketblock{@`(,`(,CX ,CY ,true ,"south")
+  ,`(,CAT2-X-COORD
+     ,(cat-y-pos (cat-2 WORLD-AFTER-MEV-BD-1))
+     ,false
+     ,"south"))
+}
+Expected Output Value:
+@racketblock{@((275 250 #t "south") (300 100 #f "south"))
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{The selected cat should be unselected when the mouse button is released, the cat should
+be placed in the new position}
+Input:
+@racketblock{@(get-cats WORLD-AFTER-MEV-BU)
+}
+Expected Output:
+@racketblock{@`(,`(,CX ,CY ,false ,"south")
+  ,`(,CAT2-X-COORD
+     ,(cat-y-pos (cat-2 WORLD-AFTER-MEV-BD-1))
+     ,false
+     ,"south"))
+}
+Expected Output Value:
+@racketblock{@((275 250 #f "south") (300 100 #f "south"))
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{Dragging a cat over the other should not affect the underlying cat}
+Input:
+@racketblock{@(get-cats WORLD-AFTER-MEV-DRAG-2)
+}
+Expected Output:
+@racketblock{@`(,`(,CX ,CY ,false ,"south") ,`(,CX ,CY ,true ,"south"))
+}
+Expected Output Value:
+@racketblock{@((275 250 #f "south") (275 250 #t "south"))
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{Both the cats should be selected on button down, when one of them is overlapping the other}
+Input:
+@racketblock{@(get-cats WORLD-AFTER-SELECTING-BOTH-CATS)
+}
+Expected Output:
+@racketblock{@`(,`(,CX ,CY ,true ,"south") ,`(,CX ,CY ,true ,"south"))
+}
+Expected Output Value:
+@racketblock{@((275 250 #t "south") (275 250 #t "south"))
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{Both cats should be dragged together when both of them are selected}
+Input:
+@racketblock{@(get-cats WORLD-AFTER-DRAGGING-BOTH-CATS)
+}
+Expected Output:
+@racketblock{@`(,`(,(+ CX 50) ,(+ CY 50) ,true ,"south")
+  ,`(,(+ CX 50) ,(+ CY 50) ,true ,"south"))
+}
+Expected Output Value:
+@racketblock{@((325 300 #t "south") (325 300 #t "south"))
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{Both cats should be unselected and their direction should not change}
+Input:
+@racketblock{@(get-cats WORLD-AFTER-DROPPING-BOTH-CATS)
+}
+Expected Output:
+@racketblock{@`(,`(,(+ CX 50) ,(+ CY 50) ,false ,"south")
+  ,`(,(+ CX 50) ,(+ CY 50) ,false ,"south"))
+}
+Expected Output Value:
+@racketblock{@((325 300 #f "south") (325 300 #f "south"))
+}
+Correct
+@subsubsection{Test (equality, 1 partial points)}
+
+@para{Placing the cat near the border should not affect its direction and its position}
+Input:
+@racketblock{@(get-cats WORLD-AFTER-MEV-BU-RBORDER)
+}
+Expected Output:
+@racketblock{@`(,`(,CX ,CY ,false ,"south") ,`(,RBORDER ,CY ,false ,"south"))
+}
+Expected Output Value:
+@racketblock{@((275 250 #f "south") (825/2 250 #f "south"))
+}
+Correct
+@subsection{Test-Group: Ket events test (8 Points)}
+@margin-note[#:left? #t]{8/8}
+These tests will check behavior of world after key events
+@para{Common Definitions}
+
+@racketblock{@(define CX CANVAS-HALF-WIDTH)
+}@racketblock{@(define CY CANVAS-HALF-HEIGHT)
+}@racketblock{@(define PAUSED-WORLD (world-after-key-event INITIAL_WORLD " "))
+}@racketblock{@(define PAUSED-WORLD-after-tick (world-after-tick PAUSED-WORLD))
+}@racketblock{@(define UNPAUSED-WORLD (world-after-kev PAUSED-WORLD-after-tick " "))
+}@racketblock{@(define UNPAUSED-WORLD-AFTER-TICK (world-after-tick UNPAUSED-WORLD))
+}@racketblock{@(define WORLD-WITH-CAT1-DIR->RIGHT
+  (change-dir INITIAL_WORLD cat-1 CX CY "right"))
+}@racketblock{@(define WORLD-WITH-CAT1-DIR->LEFT
+  (change-dir INITIAL_WORLD cat-1 CX CY "left"))
+}@racketblock{@(define WORLD-WITH-CAT2-DIR->UP
+  (change-dir INITIAL_WORLD cat-2 CX CY "up"))
+}@racketblock{@(define WORLD-WITH-CAT2-DIR->DOWN
+  (change-dir INITIAL_WORLD cat-2 CX CY "down"))
+}@racketblock{@(define WORLD-WITH-CATS->BD
+  (world-after-mev
+   WORLD-WITH-CAT2-DIR->UP
+   CAT1-X-COORD
+   INITIAL-Y-POS
+   "button-down"))
+}@racketblock{@(define WORLD-WITH-CAT1->LEFT
+  (world-after-kev WORLD-WITH-CATS->BD "left"))
+}@racketblock{@(define WORLD-WITH-CATS-DIFF-DIR-DRAG
+  (world-after-mev WORLD-WITH-CAT1->LEFT CX CY "drag"))
+}@racketblock{@(define WORLD-WITH-CATS-DIFF-DIR-RELEASE
+  (world-after-mev WORLD-WITH-CATS-DIFF-DIR-DRAG CX CY "button-up"))
+}@racketblock{@(define WORLD-WITH-SELECTED-CATS
+  (world-after-mev
+   WORLD-WITH-CATS-DIFF-DIR-RELEASE
+   CX
+   CY
+   "button-down"))
+}@racketblock{@(define WORLD-WITH-DRAGGED-CATS
+  (world-after-mev
+   WORLD-WITH-SELECTED-CATS
+   (+ CX 50)
+   (+ CY 50)
+   "drag"))
+}@racketblock{@(define WORLD-WITH-RELEASED-CATS
+  (world-after-mev
+   WORLD-WITH-DRAGGED-CATS
+   (+ CX 50)
+   (+ CY 50)
+   "button-up"))
+}@racketblock{@(define WORLD-WITH-CATS-IN-DIFF-DIR
+  (change-dir WORLD-WITH-CAT2-DIR->UP cat-1 CX CY "right"))
+}@racketblock{@(define WORLD-WITH-CATS-DIFF-DIR->BD
+  (world-after-mev WORLD-WITH-CATS-IN-DIFF-DIR CX CY "button-down"))
+}@racketblock{@(define WORLD-WITH-CATS->LEFT
+  (world-after-kev WORLD-WITH-CATS-DIFF-DIR->BD "left"))
+}@racketblock{@(define WORLD-WITH-CATS->BU
+  (world-after-mev WORLD-WITH-CATS->LEFT CX CY "button-up"))
+}
+
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{The cats should not move on tick, if the world is paused}
+Input:
+@racketblock{@(get-cats PAUSED-WORLD)
+}
+Expected Output:
+@racketblock{@`(,`(,CAT1-X-COORD ,(cat-y-pos (cat-1 INITIAL_WORLD)) ,false ,"south")
+  ,`(,CAT2-X-COORD
+     ,(cat-y-pos (cat-2 INITIAL_WORLD))
+     ,false
+     ,"south"))
+}
+Expected Output Value:
+@racketblock{@((150 100 #f "south") (300 100 #f "south"))
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{The cats should move after a tick if the world is unpaused}
+Input:
+@racketblock{@(get-cats UNPAUSED-WORLD-AFTER-TICK)
+}
+Expected Output:
+@racketblock{@`(,`(,CAT1-X-COORD
+     ,(+ (cat-y-pos (cat-1 INITIAL_WORLD)) cat-speed)
+     ,false
+     ,"south")
+  ,`(,CAT2-X-COORD
+     ,(+ (cat-y-pos (cat-2 INITIAL_WORLD)) cat-speed)
+     ,false
+     ,"south"))
+}
+Expected Output Value:
+@racketblock{@((150 108 #f "south") (300 108 #f "south"))
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{The selected cat should change its direction as east, if it is selected, right key is pressed and unselected.
+The other cat should be unaffected by this behavior}
+Input:
+@racketblock{@(get-cats WORLD-WITH-CAT1-DIR->RIGHT)
+}
+Expected Output:
+@racketblock{@`(,`(,CX ,CY ,false ,"east")
+  ,`(,(cat-x-pos (cat-2 INITIAL_WORLD))
+     ,(cat-y-pos (cat-2 INITIAL_WORLD))
+     ,false
+     ,"south"))
+}
+Expected Output Value:
+@racketblock{@((225 200 #f "east") (300 100 #f "south"))
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{Cat 1 should move towards east after a tick at specified speed, if it is selected, right key is pressed and unselected}
+Input:
+@racketblock{@(get-cats (world-after-tick WORLD-WITH-CAT1-DIR->RIGHT))
+}
+Expected Output:
+@racketblock{@`(,`(,(+ CX cat-speed) ,CY ,false ,"east")
+  ,`(,(cat-x-pos (cat-2 INITIAL_WORLD))
+     ,(+ (cat-y-pos (cat-2 INITIAL_WORLD)) cat-speed)
+     ,false
+     ,"south"))
+}
+Expected Output Value:
+@racketblock{@((233 200 #f "east") (300 108 #f "south"))
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{The selected cat should change its direction as west, if it is selected, left key is pressed and unselected.
+The other cat should be unaffected by this behavior}
+Input:
+@racketblock{@(get-cats WORLD-WITH-CAT1-DIR->LEFT)
+}
+Expected Output:
+@racketblock{@`(,`(,CX ,CY ,false ,"west")
+  ,`(,(cat-x-pos (cat-2 INITIAL_WORLD))
+     ,(cat-y-pos (cat-2 INITIAL_WORLD))
+     ,false
+     ,"south"))
+}
+Expected Output Value:
+@racketblock{@((225 200 #f "west") (300 100 #f "south"))
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{Cat 1 should move towards west after a tick at specified speed, if it is selected, left key is pressed and unselected}
+Input:
+@racketblock{@(get-cats (world-after-tick WORLD-WITH-CAT1-DIR->LEFT))
+}
+Expected Output:
+@racketblock{@`(,`(,(- CX cat-speed) ,CY ,false ,"west")
+  ,`(,(cat-x-pos (cat-2 INITIAL_WORLD))
+     ,(+ (cat-y-pos (cat-2 INITIAL_WORLD)) cat-speed)
+     ,false
+     ,"south"))
+}
+Expected Output Value:
+@racketblock{@((217 200 #f "west") (300 108 #f "south"))
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{Cat 2 should move towards north after a tick at specified speed, if it is selected, up key is pressed and unselected.
+Other cat should be unaffected}
+Input:
+@racketblock{@(get-cats (world-after-tick WORLD-WITH-CAT2-DIR->UP))
+}
+Expected Output:
+@racketblock{@`(,`(,(cat-x-pos (cat-1 INITIAL_WORLD))
+     ,(+ (cat-y-pos (cat-1 INITIAL_WORLD)) cat-speed)
+     ,false
+     ,"south")
+  ,`(,CX ,(- CY cat-speed) ,false ,"north"))
+}
+Expected Output Value:
+@racketblock{@((150 108 #f "south") (225 192 #f "north"))
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{Cat 2 should move towards south after a tick at specified speed, if it is selected, down key is pressed and unselected.
+Other cat should be unaffected}
+Input:
+@racketblock{@(get-cats (world-after-tick WORLD-WITH-CAT2-DIR->DOWN))
+}
+Expected Output:
+@racketblock{@`(,`(,(cat-x-pos (cat-1 INITIAL_WORLD))
+     ,(+ (cat-y-pos (cat-1 INITIAL_WORLD)) cat-speed)
+     ,false
+     ,"south")
+  ,`(,CX ,(+ CY cat-speed) ,false ,"south"))
+}
+Expected Output Value:
+@racketblock{@((150 108 #f "south") (225 208 #f "south"))
+}
+Correct
+@subsubsection{Test (equality, 1 partial points)}
+
+@para{The cats directions are changed separately, then selected together, dragged and released. 
+They should continue moving in their directions unchanged}
+Input:
+@racketblock{@(get-cats (world-after-tick WORLD-WITH-RELEASED-CATS))
+}
+Expected Output:
+@racketblock{@`(,`(,(- (+ CX 50) cat-speed) ,(+ CY 50) ,false ,"west")
+  ,`(,(+ CX 50) ,(- (+ CY 50) cat-speed) ,false ,"north"))
+}
+Expected Output Value:
+@racketblock{@((267 250 #f "west") (275 242 #f "north"))
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{The cats were selected together, then left key is pressed, and released. They both should be travelling together towards west}
+Input:
+@racketblock{@(get-cats (world-after-tick WORLD-WITH-CATS->BU))
+}
+Expected Output:
+@racketblock{@`(,`(,(- CX cat-speed) ,CY ,false ,"west")
+  ,`(,(- CX cat-speed) ,CY ,false ,"west"))
+}
+Expected Output Value:
+@racketblock{@((217 200 #f "west") (217 200 #f "west"))
+}
+Correct
+@subsubsection{Test (or, 1/2 partial points)}
+
+@para{The cat should hit the west wall, bounces back and start travelling towards east}
+@subsubsub*section{Test (equality)}
+
+@para{The cat should hit the east wall, bounces back and start travelling towards north with threshold}
+Input:
+@racketblock{@(<=
+ 0
+ (-
+  (first
+   (get-cat
+    cat-1
+    (simulate-until-at-wall cat-1 WORLD-WITH-CAT1-DIR->LEFT)))
+  LBORDER)
+ 2)
+}
+Expected Output:
+@racketblock{@true
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsubsub*section{Test (equality)}
+
+@para{The cat should hit the west wall, bounces back and start travelling towards east with no threshold}
+Input:
+@racketblock{@(get-cat
+ cat-1
+ (simulate-until-at-wall cat-1 WORLD-WITH-CAT1-DIR->LEFT))
+}
+Expected Output:
+@racketblock{@`(,LBORDER ,CY ,false ,"east")
+}
+Expected Output Value:
+@racketblock{@(75/2 200 #f "east")
+}
+Wrong Output:
+@racketblock{@(79/2 200 #f "east")
+}
+@subsubsub*section{Test (equality)}
+
+@para{The cat should hit the west wall, bounces back and start travelling towards east with threshold 1}
+Input:
+@racketblock{@(get-cat
+ cat-1
+ (simulate-until-at-wall cat-1 WORLD-WITH-CAT1-DIR->LEFT))
+}
+Expected Output:
+@racketblock{@`(,(+ LBORDER 1) ,CY ,false ,"east")
+}
+Expected Output Value:
+@racketblock{@(77/2 200 #f "east")
+}
+Wrong Output:
+@racketblock{@(79/2 200 #f "east")
+}
+@subsubsub*section{Test (equality)}
+
+@para{The cat should hit the west wall, bounces back and start travelling towards east  with threshold 2}
+Input:
+@racketblock{@(get-cat
+ cat-1
+ (simulate-until-at-wall cat-1 WORLD-WITH-CAT1-DIR->LEFT))
+}
+Expected Output:
+@racketblock{@`(,(+ LBORDER 2) ,CY ,false ,"east")
+}
+Expected Output Value:
+@racketblock{@(79/2 200 #f "east")
+}
+Correct
+@subsubsection{Test (or, 1/2 partial points)}
+
+@para{The cat should hit the east wall, bounces back and start travelling towards west}
+@subsubsub*section{Test (equality)}
+
+@para{The cat should hit the east wall, bounces back and start travelling towards north with threshold}
+Input:
+@racketblock{@(<=
+ 0
+ (-
+  RBORDER
+  (first
+   (get-cat
+    cat-1
+    (simulate-until-at-wall cat-1 WORLD-WITH-CAT1-DIR->RIGHT))))
+ 2)
+}
+Expected Output:
+@racketblock{@true
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsubsub*section{Test (equality)}
+
+@para{The cat should hit the east wall, bounces back and start travelling towards west no threshold}
+Input:
+@racketblock{@(get-cat
+ cat-1
+ (simulate-until-at-wall cat-1 WORLD-WITH-CAT1-DIR->RIGHT))
+}
+Expected Output:
+@racketblock{@`(,RBORDER ,CY ,false ,"west")
+}
+Expected Output Value:
+@racketblock{@(825/2 200 #f "west")
+}
+Wrong Output:
+@racketblock{@(821/2 200 #f "west")
+}
+@subsubsub*section{Test (equality)}
+
+@para{The cat should hit the east wall, bounces back and start travelling towards west with threshold 1}
+Input:
+@racketblock{@(get-cat
+ cat-1
+ (simulate-until-at-wall cat-1 WORLD-WITH-CAT1-DIR->RIGHT))
+}
+Expected Output:
+@racketblock{@`(,(- RBORDER 1) ,CY ,false ,"west")
+}
+Expected Output Value:
+@racketblock{@(823/2 200 #f "west")
+}
+Wrong Output:
+@racketblock{@(821/2 200 #f "west")
+}
+@subsubsub*section{Test (equality)}
+
+@para{The cat should hit the east wall, bounces back and start travelling towards west with threshold 2}
+Input:
+@racketblock{@(get-cat
+ cat-1
+ (simulate-until-at-wall cat-1 WORLD-WITH-CAT1-DIR->RIGHT))
+}
+Expected Output:
+@racketblock{@`(,(- RBORDER 2) ,CY ,false ,"west")
+}
+Expected Output Value:
+@racketblock{@(821/2 200 #f "west")
+}
+Correct
+@subsubsection{Test (or, 1/2 partial points)}
+
+@para{The cat should hit the north wall, bounces back and start travelling towards south}
+@subsubsub*section{Test (equality)}
+
+@para{The cat should hit the north wall, bounces back and start travelling towards north with threshold}
+Input:
+@racketblock{@(<=
+ 0
+ (-
+  (second
+   (get-cat
+    cat-2
+    (simulate-until-at-wall cat-2 WORLD-WITH-CAT2-DIR->UP)))
+  TBORDER)
+ 2)
+}
+Expected Output:
+@racketblock{@true
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsubsub*section{Test (equality)}
+
+@para{The cat should hit the north wall, bounces back and start travelling towards south no threshold}
+Input:
+@racketblock{@(get-cat cat-2 (simulate-until-at-wall cat-2 WORLD-WITH-CAT2-DIR->UP))
+}
+Expected Output:
+@racketblock{@`(,CX ,TBORDER ,false ,"south")
+}
+Expected Output Value:
+@racketblock{@(225 117/2 #f "south")
+}
+Wrong Output:
+@racketblock{@(225 121/2 #f "south")
+}
+@subsubsub*section{Test (equality)}
+
+@para{The cat should hit the north wall, bounces back and start travelling towards south with threshold 1}
+Input:
+@racketblock{@(get-cat cat-2 (simulate-until-at-wall cat-2 WORLD-WITH-CAT2-DIR->UP))
+}
+Expected Output:
+@racketblock{@`(,CX ,(+ TBORDER 1) ,false ,"south")
+}
+Expected Output Value:
+@racketblock{@(225 119/2 #f "south")
+}
+Wrong Output:
+@racketblock{@(225 121/2 #f "south")
+}
+@subsubsub*section{Test (equality)}
+
+@para{The cat should hit the north wall, bounces back and start travelling towards south with threshold 2}
+Input:
+@racketblock{@(get-cat cat-2 (simulate-until-at-wall cat-2 WORLD-WITH-CAT2-DIR->UP))
+}
+Expected Output:
+@racketblock{@`(,CX ,(+ TBORDER 2) ,false ,"south")
+}
+Expected Output Value:
+@racketblock{@(225 121/2 #f "south")
+}
+Correct
+@subsubsection{Test (or, 1/2 partial points)}
+
+@para{The cat should hit the south wall, bounces back and start travelling towards north no threshold}
+@subsubsub*section{Test (equality)}
+
+@para{The cat should hit the south wall, bounces back and start travelling towards north with threshold}
+Input:
+@racketblock{@(<=
+ 0
+ (-
+  BBORDER
+  (second
+   (get-cat
+    cat-2
+    (simulate-until-at-wall cat-2 WORLD-WITH-CAT2-DIR->DOWN))))
+ 2)
+}
+Expected Output:
+@racketblock{@true
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsubsub*section{Test (equality)}
+
+@para{The cat should hit the south wall, bounces back and start travelling towards north no threshold}
+Input:
+@racketblock{@(get-cat
+ cat-2
+ (simulate-until-at-wall cat-2 WORLD-WITH-CAT2-DIR->DOWN))
+}
+Expected Output:
+@racketblock{@`(,CX ,BBORDER ,false ,"north")
+}
+Expected Output Value:
+@racketblock{@(225 683/2 #f "north")
+}
+Wrong Output:
+@racketblock{@(225 679/2 #f "north")
+}
+@subsubsub*section{Test (equality)}
+
+@para{The cat should hit the south wall, bounces back and start travelling towards north with threshold 1}
+Input:
+@racketblock{@(get-cat
+ cat-2
+ (simulate-until-at-wall cat-2 WORLD-WITH-CAT2-DIR->DOWN))
+}
+Expected Output:
+@racketblock{@`(,CX ,(- BBORDER 1) ,false ,"north")
+}
+Expected Output Value:
+@racketblock{@(225 681/2 #f "north")
+}
+Wrong Output:
+@racketblock{@(225 679/2 #f "north")
+}
+@subsubsub*section{Test (equality)}
+
+@para{The cat should hit the south wall, bounces back and start travelling towards north with threshold 2}
+Input:
+@racketblock{@(get-cat
+ cat-2
+ (simulate-until-at-wall cat-2 WORLD-WITH-CAT2-DIR->DOWN))
+}
+Expected Output:
+@racketblock{@`(,CX ,(- BBORDER 2) ,false ,"north")
+}
+Expected Output Value:
+@racketblock{@(225 679/2 #f "north")
+}
+Correct
+@section{Results}
+Successes: 26
+@linebreak{} Wrong Outputs: 0
+@linebreak{} Errors: 0
+@linebreak{} Achieved Points: 15
+@linebreak{} Total Points (rounded): 15/15

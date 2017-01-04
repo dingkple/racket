@@ -1,0 +1,26 @@
+Date		Who		Start		Stop		interruptions		Questions		TimeOnTask		comment		
+10/6		ZkD		20:19		21:48		0					1				89				write part of the q 1 
+============commiting to git: 10/6 21:48 ===================
+10/7		ZkD		21:51		22:30		0					1				39				review the contracts and the strategies 
+10/7		ZkD		22:30		23:30		0					2				60				write the functions, make the world tick 
+10/8		ZkD		11:20		13:00		0					2				100				review all the contracts and strategies 
+10/8		ZkD		13:30		13:57		0					2				27				fix some mistakes about q 2 
+============commiting to git: 10/8 13:57 ===================
+10/8		ZkD		16:30		18:00		0					2				90				reviewing 	
+10/8		ZkD		18:00		19:25		0					1				85				add test for delivery and review 
+============commiting to git: 10/8 19:56 ===================
+10/9		ZkD		20:01		21:02		0					1				61				fix more mistakes 
+============commiting to git: 10/9 21:02 ===================
+10/10		ZkD		13:28		15:20		0					1				112				review q1 and rewrite the wrong functions 
+10/10		ZkD		15:45		17:28		0					1				103				continue the reviewing 
+============commiting to git: 10/10 17:37 ===================
+10/11		ZkD		10:44		12:04		0					2				80				changed some strategies and cut all the lines longer than 80 
+10/11		ZkD		12:04		12:28		0					2				24				review the code and cut long lines 
+============commiting to git: 10/11 12:28 ===================
+10/13		ZkD		09:10		10:14		0					1				64				change some contracts 
+10/13		ZkD		10:14		11:12		0					2				58				review the code and fix some spell problems 
+============commiting to git: 10/13 11:16 ===================
+Total Time On Task Q1 (minutes)			553
+Total Time On Task Q2 (minutes)			439
+TOTQ1(hours and tenths): 9.2
+TOTQ2(hours and tenths): 7.3

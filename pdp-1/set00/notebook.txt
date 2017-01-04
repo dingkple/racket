@@ -1,0 +1,33 @@
+Date		Who		Start		Stop		interruptions		Questions		TimeOnTask		comment		
+9/7			ZkD		11:12		11:26		0					1				14				All these work have been done in the afternoon on Wednsday this week, but I just saved all the problems to one file and did not push them to my github. So I just rewrite all the problem and set all the problem time this morning			
+9/7			ZkD		11:26		11:26		0					2				0				this is easy			
+9/7			ZkD		11:26		11:28		0					3				2				Confused how to input inexact number, like 10/3, shoud I input 3.3333333, I remember there's a short line over 3 meaning the value of 1/3, I can only use copy and paste!
+============commiting to git: 9/7 21:22 ===================
+9/7			ZkD		21:22		21:25		0					4				3				 this is easy~
+9/7			ZkD		21:25		21:27		0					5				2				 easy~		
+9/7			ZkD		21:27		21:38		0					6				11				 mistaken sqrt as sqr first, then realize that sqr is to get the square of the number and sqrt is to get the square root of the number
+9/7			ZkD		21:38		21:53		0					7				5				 try something with check-within, since there's some ineaxact result. 
+9/7			ZkD		21:53		21:50		0					8				7				 easy~
+9/7			ZkD		21:50		21:55		0					9				5				 easy! Since even has already been a buildin-func, change the  fuction name to myEven
+9/7			ZkD		21:55		21:59		0					10				4				 Easy, mind the style of the code, make it easy to read~
+============commiting to git: 9/7 21:59 ===================
+Total Time On Task Q1 (minutes)			14
+Total Time On Task Q2 (minutes)			0
+Total Time On Task Q3 (minutes)			2
+Total Time On Task Q4 (minutes)			3
+Total Time On Task Q5 (minutes)			2
+Total Time On Task Q6 (minutes)			11
+Total Time On Task Q7 (minutes)			5
+Total Time On Task Q8 (minutes)			7
+Total Time On Task Q9 (minutes)			5
+Total Time On Task Q10 (minutes)		4
+TOTQ1 (hours and tenths)				0.233
+TOTQ2 (hours and tenths)				0.0
+TOTQ3 (hours and tenths)				0.033
+TOTQ4 (hours and tenths)				0.05
+TOTQ5 (hours and tenths)				0.033
+TOTQ6 (hours and tenths)				0.183
+TOTQ7 (hours and tenths)				0.083
+TOTQ8 (hours and tenths)				0.116
+TOTQ9 (hours and tenths)				0.083
+TOTQ10 (hours and tenths)				0.066

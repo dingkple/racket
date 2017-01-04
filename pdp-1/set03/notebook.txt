@@ -1,0 +1,25 @@
+Date		Who		Start		Stop		interruptions		Questions		TimeOnTask		comment		
+9/29		ZkD		11:06		13:10		0					1				124				finished most funcs, needs tests 
+9/29		ZkD		13:50		15:10		0					2				80				finished all funcs, need tests~ 
+============commiting to git: 9/29 15:11 ===================
+9/29		ZkD		15:26		18:27		0					1				181				finished q 1
+9/29		ZkD		18:27		20:42		0					2				135				finished q 2, just need to review~ 
+============commiting to git: 9/29 20:43 ===================
+9/30		ZkD		13:54		15:00		0					2				64				review q 2
+============commiting to git: 9/30 15:43 ===================
+10/1		ZkD		13:15		14:20		0					1				65				review q 1 
+============commiting to git: 10/1 14:20 ===================
+10/1		ZkD		15:52		16:04		0					1				12				minor change to q 1 
+============commiting to git: 10/1 16:04 ===================
+10/2		ZkD		19:17		21:45		0					1				148				rewrite all the funcs having double decomposition 
+============commiting to git: 10/2 21:51 ===================
+10/6		ZkD		8:21		8:56		0					2				35				reviewed the code and the documents 
+10/6		ZkD		8:56		10:07		0					1				71				reviewed the code and the documents 
+============commiting to git: 10/6 10:08 ===================
+10/6		ZkD		13:38		14:08		0					1				30				review 		
+10/6		ZkD		14:15		14:15		0					2				7				review 		
+============commiting to git: 10/6 14:16 ===================
+Total Time On Task Q1 (minutes)			631
+Total Time On Task Q2 (minutes)			321
+TOTQ1(hours and tenths): 10.5
+TOTQ2(hours and tenths): 5.3

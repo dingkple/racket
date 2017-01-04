@@ -1,0 +1,3 @@
+Date		Who		Start		Stop		interruptions		Questions		TimeOnTask		comment		
+10/13		ZkD		12:52		16:44		0					1				232				still working on q 1` 
+============commiting to git: 10/13 16:44 ===================

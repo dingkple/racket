@@ -1,0 +1,867 @@
+#lang scribble/base
+@(require scribble/manual)
+@title{CS5010 - Problem Set 05 - Test Results}
+@author{pdp-pair-shifuxu-zhikai}
+This test suite tests your implementation of Problem Set 05
+@section{File: trees.rkt}
+Tests your implementation of Draggable trees
+@para{Common Definitions}
+
+@racketblock{@(define SQUARE-SIDE-LENGTH 20)
+}@racketblock{@(define SQ-SIDE-HALF-LENGTH (/ SQUARE-SIDE-LENGTH 2))
+}@racketblock{@(define CHILD-NODE-Y-POS (* SQUARE-SIDE-LENGTH 3))
+}@racketblock{@(define INITIAL-WORLD (initial-world "TEST"))
+}@racketblock{@(define WORLD-WITH-ONE-TREE-NODE
+  (world-after-key-event INITIAL-WORLD "t"))
+}@racketblock{@(define TREE-NODE-POSN
+  (node-to-center (first (world-to-roots WORLD-WITH-ONE-TREE-NODE))))
+}@racketblock{@(define get-min-x-pos
+  (lambda (w root-tree)
+    (foldr
+     min
+     (foldr
+      max
+      0
+      (map
+       (lambda (n) (posn-x (node-to-center n)))
+       (node-to-sons (root-tree (world-to-roots w)))))
+     (map
+      (lambda (n) (posn-x (node-to-center n)))
+      (node-to-sons (root-tree (world-to-roots w)))))))
+}@racketblock{@(define CX (posn-x TREE-NODE-POSN))
+}@racketblock{@(define CY (posn-y TREE-NODE-POSN))
+}@racketblock{@(define CX-AFTER-DRAG-200 200)
+}@racketblock{@(define CY-AFTER-DRAG-200 200)
+}@racketblock{@(define SELECTED-ROOT-NODE
+  (world-after-mouse-event
+   WORLD-WITH-ONE-TREE-NODE
+   CX
+   CY
+   "button-down"))
+}@racketblock{@(define WORLD-WITH-ONE-TREE-NODE-MOVED
+  (world-after-mouse-event SELECTED-ROOT-NODE 200 300 "drag"))
+}@racketblock{@(define WORLD-WITH-MOVED-NODE+CHILD
+  (world-after-key-event WORLD-WITH-ONE-TREE-NODE-MOVED "n"))
+}@racketblock{@(define WORLD-WITH-MOVED-NODE+CHILD-UNSELECTED
+  (world-after-mouse-event
+   WORLD-WITH-MOVED-NODE+CHILD
+   200
+   300
+   "button-up"))
+}@racketblock{@(define WORLD-WITH-MOVED-NODE+CHILD-SELECTED
+  (world-after-mouse-event
+   WORLD-WITH-MOVED-NODE+CHILD
+   200
+   360
+   "button-down"))
+}@racketblock{@(define WORLD-WITH-MOVED-NODE+DRAGGED-CHILD
+  (world-after-mouse-event
+   WORLD-WITH-MOVED-NODE+CHILD-SELECTED
+   200
+   100
+   "drag"))
+}@racketblock{@(define WORLD-WITH-MOVED-NODE-UNSELECTED
+  (world-after-mouse-event
+   WORLD-WITH-ONE-TREE-NODE-MOVED
+   200
+   300
+   "button-up"))
+}@racketblock{@(define WORLD-WITH-MOVED-NODE+MOVED-CHILD-UNSELECTED
+  (world-after-mouse-event
+   WORLD-WITH-MOVED-NODE+DRAGGED-CHILD
+   200
+   100
+   "button-up"))
+}@racketblock{@(define WORLD-WITH-MOVED-NODE+MOVED-CHILD-AFTER-U
+  (world-after-key-event
+   WORLD-WITH-MOVED-NODE+MOVED-CHILD-UNSELECTED
+   "u"))
+}@racketblock{@(define BUTTON-UP-ON-SELECTED-ROOT
+  (world-after-mouse-event SELECTED-ROOT-NODE CX CY "button-up"))
+}@racketblock{@(define DRAGGED-ROOT-NODE
+  (world-after-mouse-event SELECTED-ROOT-NODE 200 200 "drag"))
+}@racketblock{@(define ONE-ROOT-NODE-WORLD-AFTER-N-KEY
+  (world-after-key-event DRAGGED-ROOT-NODE "n"))
+}@racketblock{@(define UNSELECTED-ROOT-NODE
+  (world-after-mouse-event
+   ONE-ROOT-NODE-WORLD-AFTER-N-KEY
+   200
+   200
+   "button-up"))
+}@racketblock{@(define SELECTED-ROOT-NODE-2
+  (world-after-mouse-event
+   ONE-ROOT-NODE-WORLD-AFTER-N-KEY
+   200
+   200
+   "button-down"))
+}@racketblock{@(define DRAGGED-PARENT-AND-CHILD
+  (world-after-mouse-event SELECTED-ROOT-NODE-2 100 100 "drag"))
+}@racketblock{@(define CHILD-NODE-SELECTED
+  (world-after-mouse-event
+   UNSELECTED-ROOT-NODE
+   200
+   (+ 200 (* SQUARE-SIDE-LENGTH 3))
+   "button-down"))
+}@racketblock{@(define DRAG-CHILD-NODE
+  (world-after-mouse-event CHILD-NODE-SELECTED 300 250 "drag"))
+}@racketblock{@(define PLACE-CHILD-NODE-TO-RIGHT
+  (world-after-mouse-event DRAG-CHILD-NODE 300 250 "button-up"))
+}@racketblock{@(define SELECT-ROOT-TO-CREATE-CHILD-2
+  (world-after-mouse-event
+   PLACE-CHILD-NODE-TO-RIGHT
+   200
+   200
+   "button-down"))
+}@racketblock{@(define ROOT-WITH-2-CHILD-NODES
+  (world-after-key-event SELECT-ROOT-TO-CREATE-CHILD-2 "n"))
+}@racketblock{@(define WORLD-WITH-SUB-TREE
+  (world-after-key-event CHILD-NODE-SELECTED "n"))
+}@racketblock{@(define SELECT-SUBTREE
+  (world-after-mouse-event
+   WORLD-WITH-SUB-TREE
+   200
+   (+ 200 (* SQUARE-SIDE-LENGTH 3))
+   "button-down"))
+}@racketblock{@(define DRAG-SUBTREE-TO-TOP-RIGHT
+  (world-after-mouse-event
+   SELECT-SUBTREE
+   300
+   SQUARE-SIDE-LENGTH
+   "drag"))
+}@racketblock{@(define PLACE-SUBTREE-TO-TOP-RIGHT
+  (world-after-mouse-event
+   DRAG-SUBTREE-TO-TOP-RIGHT
+   300
+   SQUARE-SIDE-LENGTH
+   "button-up"))
+}@racketblock{@(define SELECTED-SUBTREE-TO-DELETE
+  (world-after-mouse-event
+   DRAG-SUBTREE-TO-TOP-RIGHT
+   300
+   SQUARE-SIDE-LENGTH
+   "button-down"))
+}@racketblock{@(define TREE-WITH-DELETED-SUBTREE
+  (world-after-key-event SELECTED-SUBTREE-TO-DELETE "d"))
+}@racketblock{@(define SELETED-TREE-TO-DELETE
+  (world-after-mouse-event
+   TREE-WITH-DELETED-SUBTREE
+   200
+   200
+   "button-down"))
+}@racketblock{@(define DELETED-TREE
+  (world-after-key-event SELETED-TREE-TO-DELETE "d"))
+}
+
+@subsection{Test-Group: Basic functionality (3 Points)}
+@margin-note[#:left? #t]{3/3}
+Covers the basic requirement of the problem
+@subsubsection{Test (equality)}
+
+@para{The canvas starts empty!}
+Input:
+@racketblock{@(world-to-roots INITIAL-WORLD)
+}
+Expected Output:
+@racketblock{@empty
+}
+Expected Output Value:
+@racketblock{@()
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{Hitting "t" on initial world creates a new root node}
+Input:
+@racketblock{@(length (world-to-roots WORLD-WITH-ONE-TREE-NODE))
+}
+Expected Output:
+@racketblock{@1
+}
+Expected Output Value:
+@racketblock{@1
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{Hitting "t", the root node appears tangent to the top of the canvas}
+Input:
+@racketblock{@(posn-y
+ (node-to-center (first (world-to-roots WORLD-WITH-ONE-TREE-NODE))))
+}
+Expected Output:
+@racketblock{@(/ SQUARE-SIDE-LENGTH 2)
+}
+Expected Output Value:
+@racketblock{@10
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{Hitting "t" creates a root node without sons}
+Input:
+@racketblock{@(length
+ (node-to-sons (first (world-to-roots WORLD-WITH-ONE-TREE-NODE))))
+}
+Expected Output:
+@racketblock{@0
+}
+Expected Output Value:
+@racketblock{@0
+}
+Correct
+@subsubsection{Test (equality, 0.3 partial points)}
+
+@para{Button-down anywhere outside the tree node should not select the tree node}
+Input:
+@racketblock{@(node-to-selected?
+ (first
+  (world-to-roots
+   (world-after-mouse-event
+    WORLD-WITH-ONE-TREE-NODE
+    CX
+    50
+    "button-down"))))
+}
+Expected Output:
+@racketblock{@false
+}
+Expected Output Value:
+@racketblock{@#f
+}
+Correct
+@subsubsection{Test (equality, 0.3 partial points)}
+
+@para{Button down anywhere inside root node should select the node}
+Input:
+@racketblock{@(node-to-selected? (first (world-to-roots SELECTED-ROOT-NODE)))
+}
+Expected Output:
+@racketblock{@true
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsubsection{Test (equality, 0.4 partial points)}
+
+@para{Button up should unselect the seleted root node}
+Input:
+@racketblock{@(node-to-selected?
+ (first (world-to-roots BUTTON-UP-ON-SELECTED-ROOT)))
+}
+Expected Output:
+@racketblock{@false
+}
+Expected Output Value:
+@racketblock{@#f
+}
+Correct
+@subsubsection{Test (equality, 1 partial points)}
+
+@para{Dragging the root node should move the node in the mouse's position}
+Input:
+@racketblock{@(node-to-center (first (world-to-roots DRAGGED-ROOT-NODE)))
+}
+Expected Output:
+@racketblock{@(make-posn CX-AFTER-DRAG-200 CY-AFTER-DRAG-200)
+}
+Expected Output Value:
+@racketblock{@#(struct:posn 200 200)
+}
+Correct
+@subsection{Test-Group: selecting, dragging and deleting node (6 Points)}
+@margin-note[#:left? #t]{6/6}
+Covers the tests on Mouse events and key events
+@subsubsection{Test (equality)}
+
+@para{one child should be created for selected tree node}
+Input:
+@racketblock{@(length
+ (node-to-sons
+  (first (world-to-roots ONE-ROOT-NODE-WORLD-AFTER-N-KEY))))
+}
+Expected Output:
+@racketblock{@1
+}
+Expected Output Value:
+@racketblock{@1
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{The first son of a node should appear 3 square-lengths down and directly beneath the parent node}
+Input:
+@racketblock{@(node-to-center
+ (first
+  (node-to-sons
+   (first (world-to-roots ONE-ROOT-NODE-WORLD-AFTER-N-KEY)))))
+}
+Expected Output:
+@racketblock{@(make-posn
+ CX-AFTER-DRAG-200
+ (+ CY-AFTER-DRAG-200 (* SQUARE-SIDE-LENGTH 3)))
+}
+Expected Output Value:
+@racketblock{@#(struct:posn 200 260)
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{The second son of a node should appear 2 square-lengths left to leftmost node of root node}
+Input:
+@racketblock{@(node-to-center
+ (first
+  (node-to-sons
+   (first
+    (world-to-roots
+     (world-after-key-event ONE-ROOT-NODE-WORLD-AFTER-N-KEY "n"))))))
+}
+Expected Output:
+@racketblock{@(make-posn
+ (-
+  (get-min-x-pos ONE-ROOT-NODE-WORLD-AFTER-N-KEY first)
+  (* 2 SQUARE-SIDE-LENGTH))
+ (+ 200 (* SQUARE-SIDE-LENGTH 3)))
+}
+Expected Output Value:
+@racketblock{@#(struct:posn 160 260)
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{The child node should be selected}
+Input:
+@racketblock{@(node-to-selected?
+ (first (node-to-sons (first (world-to-roots CHILD-NODE-SELECTED)))))
+}
+Expected Output:
+@racketblock{@true
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{Selecting child node should not affect the parent node}
+Input:
+@racketblock{@(node-to-selected? (first (world-to-roots CHILD-NODE-SELECTED)))
+}
+Expected Output:
+@racketblock{@false
+}
+Expected Output Value:
+@racketblock{@#f
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{Selecting child node should not affect the parent node}
+Input:
+@racketblock{@(node-to-center (first (world-to-roots CHILD-NODE-SELECTED)))
+}
+Expected Output:
+@racketblock{@(node-to-center
+ (first (world-to-roots ONE-ROOT-NODE-WORLD-AFTER-N-KEY)))
+}
+Expected Output Value:
+@racketblock{@#(struct:posn 200 200)
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{Selecting the parent node should not affect the child node}
+Input:
+@racketblock{@(node-to-selected?
+ (first (node-to-sons (first (world-to-roots SELECTED-ROOT-NODE-2)))))
+}
+Expected Output:
+@racketblock{@false
+}
+Expected Output Value:
+@racketblock{@#f
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{Dragging the parent node should update its center position}
+Input:
+@racketblock{@(node-to-center (first (world-to-roots DRAGGED-PARENT-AND-CHILD)))
+}
+Expected Output:
+@racketblock{@(make-posn 100 100)
+}
+Expected Output Value:
+@racketblock{@#(struct:posn 100 100)
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{Dragging parent node should also move the subtree}
+Input:
+@racketblock{@(node-to-center
+ (first
+  (node-to-sons (first (world-to-roots DRAGGED-PARENT-AND-CHILD)))))
+}
+Expected Output:
+@racketblock{@(make-posn 100 (+ 100 (* 3 SQUARE-SIDE-LENGTH)))
+}
+Expected Output Value:
+@racketblock{@#(struct:posn 100 160)
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{Selecting the child and pressing "n" should not affect its parent}
+Input:
+@racketblock{@(length (node-to-sons (first (world-to-roots WORLD-WITH-SUB-TREE))))
+}
+Expected Output:
+@racketblock{@1
+}
+Expected Output Value:
+@racketblock{@1
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{Selecting the child and pressing "n" should create new child}
+Input:
+@racketblock{@(length
+ (node-to-sons
+  (first
+   (node-to-sons (first (world-to-roots WORLD-WITH-SUB-TREE))))))
+}
+Expected Output:
+@racketblock{@1
+}
+Expected Output Value:
+@racketblock{@1
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{The first son of a node should appear 3 square-lengths down and directly beneath the node}
+Input:
+@racketblock{@(node-to-center
+ (first
+  (node-to-sons
+   (first
+    (node-to-sons (first (world-to-roots WORLD-WITH-SUB-TREE)))))))
+}
+Expected Output:
+@racketblock{@(make-posn
+ (posn-x
+  (node-to-center
+   (first
+    (node-to-sons (first (world-to-roots WORLD-WITH-SUB-TREE))))))
+ (+
+  (posn-y
+   (node-to-center
+    (first
+     (node-to-sons (first (world-to-roots WORLD-WITH-SUB-TREE))))))
+  (* SQUARE-SIDE-LENGTH 3)))
+}
+Expected Output Value:
+@racketblock{@#(struct:posn 200 320)
+}
+Correct
+@subsubsection{Test (equality)}
+
+@para{Selecting a node should not affect its child and its parent}
+Input:
+@racketblock{@(or (node-to-selected?
+     (first
+      (node-to-sons
+       (first
+        (node-to-sons (first (world-to-roots SELECT-SUBTREE)))))))
+    (node-to-selected? (first (world-to-roots SELECT-SUBTREE))))
+}
+Expected Output:
+@racketblock{@false
+}
+Expected Output Value:
+@racketblock{@#f
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{Selecting a node should not affect its child and its parent}
+Input:
+@racketblock{@(node-to-selected?
+ (first (node-to-sons (first (world-to-roots SELECT-SUBTREE)))))
+}
+Expected Output:
+@racketblock{@true
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{The child node should have been dragged along with parent node}
+Input:
+@racketblock{@(node-to-center
+ (first
+  (node-to-sons
+   (first
+    (node-to-sons
+     (first (world-to-roots PLACE-SUBTREE-TO-TOP-RIGHT)))))))
+}
+Expected Output:
+@racketblock{@(make-posn
+ (posn-x
+  (node-to-center
+   (first
+    (node-to-sons
+     (first (world-to-roots PLACE-SUBTREE-TO-TOP-RIGHT))))))
+ (+
+  (posn-y
+   (node-to-center
+    (first
+     (node-to-sons
+      (first (world-to-roots PLACE-SUBTREE-TO-TOP-RIGHT))))))
+  (* SQUARE-SIDE-LENGTH 3)))
+}
+Expected Output Value:
+@racketblock{@#(struct:posn 300 80)
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{Deleting a selected node should delete its subtree}
+Input:
+@racketblock{@(node-to-sons (first (world-to-roots TREE-WITH-DELETED-SUBTREE)))
+}
+Expected Output:
+@racketblock{@empty
+}
+Expected Output Value:
+@racketblock{@()
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{Deleting a selected tree node should delete entire tree}
+Input:
+@racketblock{@(world-to-roots DELETED-TREE)
+}
+Expected Output:
+@racketblock{@empty
+}
+Expected Output Value:
+@racketblock{@()
+}
+Correct
+@subsubsection{Test (equality, 1/2 partial points)}
+
+@para{Second child node should have been 2 square lengths to the left most child node}
+Input:
+@racketblock{@(node-to-center
+ (first
+  (node-to-sons (first (world-to-roots ROOT-WITH-2-CHILD-NODES)))))
+}
+Expected Output:
+@racketblock{@(make-posn
+ (-
+  (posn-x
+   (node-to-center
+    (first
+     (node-to-sons
+      (first (world-to-roots SELECT-ROOT-TO-CREATE-CHILD-2))))))
+  (* 2 SQUARE-SIDE-LENGTH))
+ (+
+  (posn-y
+   (node-to-center
+    (first (world-to-roots SELECT-ROOT-TO-CREATE-CHILD-2))))
+  (* 3 SQUARE-SIDE-LENGTH)))
+}
+Expected Output Value:
+@racketblock{@#(struct:posn 260 260)
+}
+Correct
+@subsection{Test-Group: selecting, dragging, creating and deleting multiple nodes (6 Points)}
+@margin-note[#:left? #t]{6/6}
+Covers the tests on Mouse events and key events on multiple nodes
+@para{Common Definitions}
+
+@racketblock{@(define WORLD-WITH-TWO-TREES
+  (world-after-key-event PLACE-SUBTREE-TO-TOP-RIGHT "t"))
+}@racketblock{@(define WORLD-WITH-SECOND-ROOT-NODE-SELECTED
+  (world-after-mouse-event WORLD-WITH-TWO-TREES CX CY "button-down"))
+}@racketblock{@(define SECOND-ROOT-NODE-WITH-CHILD
+  (world-after-key-event WORLD-WITH-SECOND-ROOT-NODE-SELECTED "n"))
+}@racketblock{@(define UNSELECT-SECOND-TREE
+  (world-after-mouse-event
+   SECOND-ROOT-NODE-WITH-CHILD
+   CX
+   CY
+   "button-up"))
+}@racketblock{@(define SELECT-SECOND-TREE-CHILD
+  (world-after-mouse-event
+   UNSELECT-SECOND-TREE
+   CX
+   (+ CY 60)
+   "button-down"))
+}@racketblock{@(define SECOND-TREE-WITH-GRAND-CHILD
+  (world-after-key-event SELECT-SECOND-TREE-CHILD "n"))
+}@racketblock{@(define UNSELECT-SECOND-TREE-WITH-GRAND-CHILD
+  (world-after-mouse-event
+   SECOND-TREE-WITH-GRAND-CHILD
+   CX
+   CY
+   "button-up"))
+}@racketblock{@(define SELECT-SECOND-TREE
+  (world-after-mouse-event
+   UNSELECT-SECOND-TREE-WITH-GRAND-CHILD
+   CX
+   CY
+   "button-down"))
+}@racketblock{@(define DRAG-SECOND-TREE
+  (world-after-mouse-event
+   SELECT-SECOND-TREE
+   (- CX 100)
+   (+ CY 100)
+   "drag"))
+}@racketblock{@(define PLACE-TREE
+  (world-after-mouse-event
+   DRAG-SECOND-TREE
+   (- CX 100)
+   (+ CY 100)
+   "button-up"))
+}@racketblock{@(define DRAG-SECOND-TREE-CHILD
+  (world-after-mouse-event
+   SELECT-SECOND-TREE-CHILD
+   300
+   SQUARE-SIDE-LENGTH
+   "drag"))
+}@racketblock{@(define UNSELECT-SECOND-TREE-CHILD
+  (world-after-mouse-event
+   DRAG-SECOND-TREE-CHILD
+   300
+   SQUARE-SIDE-LENGTH
+   "button-up"))
+}@racketblock{@(define SELECT-MULTIPLE-NODES
+  (world-after-mouse-event
+   UNSELECT-SECOND-TREE-CHILD
+   300
+   SQUARE-SIDE-LENGTH
+   "button-down"))
+}@racketblock{@(define DRAG-MULTIPLE-NODES
+  (world-after-mouse-event
+   SELECT-MULTIPLE-NODES
+   SQUARE-SIDE-LENGTH
+   SQUARE-SIDE-LENGTH
+   "drag"))
+}@racketblock{@(define CREATE-NODES-BEYOND-CANVAS
+  (world-after-key-event DRAG-MULTIPLE-NODES "n"))
+}@racketblock{@(define DELETE-MULTIPLE-NODES
+  (world-after-key-event CREATE-NODES-BEYOND-CANVAS "d"))
+}@racketblock{@(define CREATE-MULTIPLE-NODES
+  (lambda (w n)
+    (foldr
+     (lambda (n w) (world-after-key-event w "n"))
+     w
+     (build-list n (lambda (x) x)))))
+}
+
+@subsubsection{Test (equality, 1 partial points)}
+
+@para{There should be no children after pressing u}
+Input:
+@racketblock{@(node-to-sons
+ (first (world-to-roots WORLD-WITH-MOVED-NODE+MOVED-CHILD-AFTER-U)))
+}
+Expected Output:
+@racketblock{@'()
+}
+Expected Output Value:
+@racketblock{@()
+}
+Correct
+@subsubsection{Test (equality, 0.3 partial points)}
+
+@para{Two root nodes should be present in the world}
+Input:
+@racketblock{@(length (world-to-roots WORLD-WITH-TWO-TREES))
+}
+Expected Output:
+@racketblock{@2
+}
+Expected Output Value:
+@racketblock{@2
+}
+Correct
+@subsubsection{Test (equality, 0.4 partial points)}
+
+@para{Selecting the root node should not affect the other tree,
+if the new root node doesn't overlaps the nodes in other tree}
+Input:
+@racketblock{@(and (node-to-selected?
+      (first (world-to-roots WORLD-WITH-SECOND-ROOT-NODE-SELECTED)))
+     (not
+      (node-to-selected?
+       (second
+        (world-to-roots WORLD-WITH-SECOND-ROOT-NODE-SELECTED))))
+     (not
+      (ormap
+       node-to-selected?
+       (node-to-sons
+        (second
+         (world-to-roots WORLD-WITH-SECOND-ROOT-NODE-SELECTED))))))
+}
+Expected Output:
+@racketblock{@true
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsubsection{Test (equality, 0.4 partial points)}
+
+@para{Dragging a node over the other node should not affect the underlying node}
+Input:
+@racketblock{@(and (node-to-selected?
+      (first
+       (node-to-sons
+        (first (world-to-roots DRAG-SECOND-TREE-CHILD)))))
+     (not
+      (node-to-selected?
+       (second (world-to-roots DRAG-SECOND-TREE-CHILD))))
+     (not
+      (ormap
+       node-to-selected?
+       (node-to-sons
+        (second (world-to-roots DRAG-SECOND-TREE-CHILD))))))
+}
+Expected Output:
+@racketblock{@true
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsubsection{Test (equality, 0.4 partial points)}
+
+@para{Overlapping nodes should be selected if anyone of them is selected}
+Input:
+@racketblock{@(and (node-to-selected?
+      (first
+       (node-to-sons (first (world-to-roots SELECT-MULTIPLE-NODES)))))
+     (node-to-selected?
+      (first
+       (node-to-sons
+        (second (world-to-roots SELECT-MULTIPLE-NODES))))))
+}
+Expected Output:
+@racketblock{@true
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsubsection{Test (equality, 0.4 partial points)}
+
+@para{Overlapping nodes which were selected should be dragged together}
+Input:
+@racketblock{@(equal?
+ (node-to-center
+  (first (node-to-sons (first (world-to-roots DRAG-MULTIPLE-NODES)))))
+ (node-to-center
+  (first
+   (node-to-sons (second (world-to-roots DRAG-MULTIPLE-NODES))))))
+}
+Expected Output:
+@racketblock{@true
+}
+Expected Output Value:
+@racketblock{@#t
+}
+Correct
+@subsubsection{Test (equality, 0.4 partial points)}
+
+@para{Dragging the root node should also move its child nodes and their child nodes}
+Input:
+@racketblock{@(list
+ (node-to-center (first (world-to-roots PLACE-TREE)))
+ (node-to-center
+  (first (node-to-sons (first (world-to-roots PLACE-TREE)))))
+ (node-to-center
+  (first
+   (node-to-sons
+    (first (node-to-sons (first (world-to-roots PLACE-TREE))))))))
+}
+Expected Output:
+@racketblock{@(list
+ (make-posn (- CX 100) (+ CY 100))
+ (make-posn (- CX 100) (+ CY (* 3 SQUARE-SIDE-LENGTH) 100))
+ (make-posn (- CX 100) (+ CY (* 6 SQUARE-SIDE-LENGTH) 100)))
+}
+Expected Output Value:
+@racketblock{@(#(struct:posn 100 110) #(struct:posn 100 170) #(struct:posn 100 230))
+}
+Correct
+@subsubsection{Test (equality, 0.4 partial points)}
+
+@para{Two child nodes should have been created for each selected Node on different trees}
+Input:
+@racketblock{@(list
+ (length
+  (node-to-sons
+   (first
+    (node-to-sons
+     (first (world-to-roots CREATE-NODES-BEYOND-CANVAS))))))
+ (length
+  (node-to-sons
+   (first
+    (node-to-sons
+     (second (world-to-roots CREATE-NODES-BEYOND-CANVAS)))))))
+}
+Expected Output:
+@racketblock{@(list 1 1)
+}
+Expected Output Value:
+@racketblock{@(1 1)
+}
+Correct
+@subsubsection{Test (equality, 0.4 partial points)}
+
+@para{Selected nodes should be  deleted completely}
+Input:
+@racketblock{@(list
+ (length
+  (node-to-sons (first (world-to-roots DELETE-MULTIPLE-NODES))))
+ (length
+  (node-to-sons
+   (second (world-to-roots CREATE-NODES-BEYOND-CANVAS)))))
+}
+Expected Output:
+@racketblock{@(list 0 1)
+}
+Expected Output Value:
+@racketblock{@(0 1)
+}
+Correct
+@subsubsection{Test (equality, 0.4 partial points)}
+
+@para{Child node should not be created beyond the left boundary.}
+Input:
+@racketblock{@(length
+ (node-to-sons
+  (first
+   (world-to-roots (CREATE-MULTIPLE-NODES SELECTED-ROOT-NODE-2 9)))))
+}
+Expected Output:
+@racketblock{@5
+}
+Expected Output Value:
+@racketblock{@5
+}
+Correct
+@section{Results}
+Successes: 36
+@linebreak{} Wrong Outputs: 0
+@linebreak{} Errors: 0
+@linebreak{} Achieved Points: 15
+@linebreak{} Total Points (rounded): 15/15

@@ -1,0 +1,227 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname obstacles) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
+;; FILE NAME: obstacles.rkt
+
+;; How this program works:
+;;
+;;
+;;
+;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(require "sets.rkt")
+(require "extras.rkt")
+(require rackunit)
+
+
+(provide 
+ position-set-equal?
+ obstacle?
+ blocks-to-obstacles)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; A Position is a (list PosInt PosInt)
+;; Interp: (x y) represents the position x, y
+
+;; TEMPLATE
+;; p-fn: Position -> ??
+;; (define (p-fn p)
+;;   (... (first p)
+;;        (second p)))
+
+
+;; A ListOfPosition is either
+;; -- empty
+;; -- (cons Position ListOfPosition)
+;; WHERE: the PositionSet is a list of positions without duplication
+
+;; TEMPLATE
+;; ps-fn : PositionSet -> ListOfPosition
+;; (define (ps-fn ps)
+;;   (cond
+;;     [(empty? ps) ...]
+;;     [else (... (p-fn (first ps))
+;;                (ps-fn (rest ps)))]))
+
+
+;; A PositionSet is a ListOfPosition
+
+
+;; A ListOfPositionSet is either
+;; -- empty
+;; -- (cons PositionSet ListOfPositionSet)
+;; WHERE: the PositionSetSet is a list of PositionSets without duplication
+
+;; A PositionSetSet is a ListOfPositionSet
+
+;; TEMPLATE
+;; pss-fn : ListOfPositionSet -> ??
+;; (define (pss-fn pss)
+;;   [(empty? pss) ...]
+;;   [else (... (ps-fn (first pss))
+;;              (pss-fn (rest pss)))])
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Examples for testing
+
+(define block1 (list (list 1 2) (list 1 3) (list 2 3) (list 3 2) 
+                     (list 3 4) (list 4 1) (list 4 4)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; position-set-equal? : PositionSet PositionSet -> Boolean
+;; GIVEN: two PositionSets
+;; RETURNS: true iff they denote the same set of positions
+;; EXAMPLES: see tests below
+;; STRATEGY: function composition
+(define (position-set-equal? ps1 ps2)
+  (set-equal? ps1 ps2))
+
+
+;; obstacle? : PositionSet -> Boolean
+;; GIVEN: a PositionSet
+;; WHERE: every position in the given position set is all occupied
+;; RETURNS: true iff the set of positions would be an obstacle 
+;; EXAMPLES: see tests below
+;; STRATEGY:
+(define (obstacle? posset)
+  (cond
+    [(empty? posset) false]
+    [else (if (empty? (first posset))
+              false
+              (position-set-equal? (reachalbes (list (first posset)) 
+                                               posset)
+                                   posset))]))
+
+
+;; adjacent? : Position Position -> Boolean
+;; GIVEN: two Positions p1 and p2
+;; RETURNS: true iff two positions are adjacent to each other
+;; EXAMPLES: (position-adjacent? (list 1 2) (list 2 3)) => true
+;; STRATEGY: structural decomposition on Position 
+(define (adjacent? p1 p2)
+  (and (= (abs (- (first p1) (first p2))) 1)
+       (= (abs (- (second p1) (second p2))) 1)))
+
+;; adjacent-positions : Position PositionSet -> PositionSet
+;; GIVEN: a Position pos and a PositionSet posset
+;; RETURNS: a PositionSet which contains the positions that are adjacent to 
+;; the given position
+;; EXAMPLES: 
+;; STRATEGY: HOFC
+(define (adjacent-positions pos posset)
+  (filter
+   (lambda (p)
+     (adjacent? p pos))
+   posset))
+
+
+;; all-adjacent-positions : PositionSet PositionSet -> PositionSet
+;; GIVEN: a PositionSet ps and another PositionSet posset
+;; RETURNS: a PositionSet which contains a list of positions that are 
+;; adjacent positions of the given list of positions
+;; EXAMPLES: 
+;; STRATEGY: HOFC
+(define (all-adjacent-positions ps posset)
+  (foldr
+   (lambda (p set-til-now)
+     (set-union (adjacent-positions p posset) set-til-now))
+   empty
+   ps))
+
+
+;; reachalbes : PositionSet PositionSet PositionSet -> PositionSet 
+;; GIVEN: a PositionSet ps and a PositionSet posset
+;; RETURNS: a set of positions which are reachalbe from the given position set
+;; EXAMPLES: (reachalbes ) =>
+;; STRATEGY: general recursion
+;; HALTING MEASURE: the set of positions NOT in 'ps'
+;; TERMINATION ARGUMENT: At the recursive call, 'candidates' contains at
+;; least one element that is not in 'PS' (otherwise the subset? test
+;; would have returned true).  Hence the result of the set-union is at
+;; least one element bigger than 'ps'.  So the halting measure decreases.
+(define (reachalbes ps posset)
+  (local
+    ((define candidates (all-adjacent-positions ps posset)))
+    (cond
+      [(subset? candidates ps) ps]
+      [else (reachalbes (set-union candidates ps)
+                        posset)])))
+
+;; blocks-to-obstacles : PositionSet -> PositionSetSet
+;; GIVEN: the set of occupied positions on a chessboard
+;; RETURNS: the set of obstacles on that chessboard.
+;; EXAMPLES: see tests below
+;; STRATEGY: function composition
+(define (blocks-to-obstacles posset)
+  (if (empty? (set-diff posset (blocks-to-one-obstacle posset)))
+      (list posset)
+      (cons (blocks-to-one-obstacle posset) 
+            (blocks-to-obstacles 
+             (set-diff posset 
+                       (blocks-to-one-obstacle posset))))))
+  
+
+
+;; blocks-to-one-obstacle : PositionSet -> PositionSet
+;; GIVEN:
+;; RETURNS:
+;; EXAMPLES:
+;; STRATEGY: function composition
+(define (blocks-to-one-obstacle posset)
+  (blocks-to-one-obstacle-inner posset empty))
+
+
+
+;; 
+(define (blocks-to-one-obstacle-inner posset newset)
+  (cond
+    [(empty? posset) newset]
+    [else (if (obstacle? (set-cons (first posset) newset))
+              (blocks-to-one-obstacle-inner 
+                (rest posset) 
+                (set-cons (first posset) newset))
+              (blocks-to-one-obstacle-inner
+                (rest posset)
+                newset))]))
+
+;; set-diff : PositionSet PositionSet -> PositionSet 
+;; GIVEN: two PositionSets set1 and set2
+;; RETURNS: a new position set which contains the positions that only belongs to 
+;; the first set 
+;; EXAMPLES: (set-diff (list (list 1 2)) (list (list 1 2))) => empty
+;; STRATEGY: HOFC
+(define (set-diff ps1 ps2)
+  (filter
+   (lambda (p) (not (my-member? p ps2)))
+   ps1))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; TESTS
+
+#;(begin-for-test
+  (check-equal? ()
+                
+                ""))
+
+#;(obstacle? (list (list 1 2) (list 1 3) (list 2 3) (list 3 2) (list 3 4) 
+                 (list 4 1) (list 4 4)))
+#;(obstacle? (list (list 1 2) (list 2 3) (list 3 2) (list 4 1) (list 3 4)))
+#;(obstacle? (list (list 4 1) (list 3 2)))
+#;(blocks-to-obstacles (list (list 1 2) (list 1 3) (list 2 3) (list 3 2) 
+                           (list 3 4) (list 4 1) (list 4 4)))
+
+
+;;(position-set-equal? (list (list 1 2) (list 1 3)) 
+;;                                (list (list (1 3)))) => false
+
+
+
+

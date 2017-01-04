@@ -1,0 +1,14 @@
+(require 2htdp/universe)
+(require 2htdp/image)
+(require rackunit)
+(require "extras.rkt")
+
+
+(define (create-white-scene)
+	(underlay/xy (rectangle 400 300 "solid" "white") 50 50 Rect)
+		)
+
+(define Rect 
+	(rectangle 40 4 "solid" "green"))
+
+(animate create-white-scene)

@@ -1,0 +1,24 @@
+Date	Who		Start	Stop	Interruptions	Question    TimeOnTask	  Comments		
+10/28	ZkD	        17:16	00:44	100		2	    348           almost finished question 2 and deem that finished functions works well by dfs
+============committing to git: 10/29 00:45 ===================
+10/29	SFX	        13:21	15:46	30		1	    175		  realized all the functions in question 1   
+============committing to git: 10/29 15:46 ===================
+10/30	ZkD             17:10	19:30	0		2	    140		  finished some comments on question 2 and need to discuss data definition part
+10/30   SFX             13:10   15:30   10              1           130           finished all the contracts and purpose statement in question 1 and added some tests 
+============committing to git: 10/30 20:52 ===================
+11/02	ZkD,SFX	        10:40	11:42	0		2	    62		  changed the question 2 into bfs problem, rewrote some parts of the code                                                          
+11/02   ZkD,SFX         14:20   15:10   5               2           45            revised the contracts and purpose statement in question 2
+11/02	ZkD,SFX	        19:00	20:52	0	        2	    112		  added new data definition to question2, then revised it
+============committing to git: 11/02 21:00 ===================
+11/03   SFX             10:13   13:04   30              1           111           finally review the question 1 code and revise some comments problem             
+11/03   ZkD,SFX         13:35   16:52   0               2           207           revised some codes to improve time complexity, contract and template problems in the question 2
+============committing to git: 11/03 17:00 ===================
+
+Total Time On Task Q1 (minutes)        399
+Total Time On Task Q2 (minutes)        914                      
+TOTQ1 (hours and tenths)               6.7    
+TOTQ2 (hours and tenths)               15.3   
+
+
+
+  

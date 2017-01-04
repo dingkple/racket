@@ -1,0 +1,63 @@
+(define machine (chocs carts bank cus_money))
+(define prices (chocs carts))
+
+(define nowprice (make-prices chocs carts))
+
+(define (initial-machine chocs carts)
+  (make-machine chocs carts 0 0)
+  )
+
+(define (buy_one_choc m np)
+  (if (and (> (machine-cus_money m) (nowprice-chocs np))
+           (> (machine-chocs m) 0))
+      (make-machine (- (machine-chocs m) 1)
+                    (machine-carts m)
+                    (+ (machine-bank m) (nowprice-chocs np))
+                    (- (machine-cus_money m) (nowprice-chocs np))
+                    )
+      m))
+
+(define (buy_one_carts m np)
+  (if (and (> (machine-cus_money m) (nowprice-carts np))
+           (> (machine-carts m) 0))
+      (make-machine (machine-chocs m)
+                    (- (machine-chocs m) 1)
+                    (+ (machine-bank m) (nowprice-carts np))
+                    (- (machine-cus_money m) (nowprice-carts np))
+                    )
+      m))
+
+(define (release m)
+  (make-machine (machine-chocs m)
+                (machine-carts m)
+                (machine-bank m)
+                (machine-cus_money m)))
+
+(define (add_money m money)
+  (make-machine (machine-chocs m)
+                (machine-carts m)
+                (machine-bank m)
+                (+ money (machine-cus_money m))))
+
+                    
+(define (machine-next-state machine cmd)
+  (cond
+    [(number? cmd) (add_money machine cmd)]
+    [(string? cmd) (cond
+                     [(= "chocolate" cmd) (buy_one_choc m np)]
+                     [(= "carrots" cmd) (buy_one_carts m np)]
+                     [(= "release" cmd) (release m)]
+                     )]
+    ))
+
+(define (machine-chocolates m)
+  (machine-chocs m)
+  )
+
+(define (machine-carts m)
+  (machine-carts m)
+  )
+
+(define (machine-bank m)
+  (machine-bank m)
+  )

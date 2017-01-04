@@ -1,0 +1,1 @@
+("6.0.1" ("7117897ba0bb293a9b1cee604594e0bfe65360af" . "288f344f9a4b3bece7a44e4c5c0af9369c7ad29b") (collects #"rackunit" #"main.rkt") #"/Users/kingkz/Documents/git/pdp-pair-shifuxu-zhikai/set07/extras.rkt" (collects #"lang" #"htdp-intermediate-lambda.rkt") (collects #"lang" #"htdp-intermediate-lambda-reader.rkt"))

@@ -1,0 +1,308 @@
+#lang scribble/base
+@(require scribble/manual)
+@(require (for-label racket "pdpunit-scribble.rkt"))
+
+@title{PdpUnit - Scribble}
+@author{Fabian Muehlboeck}
+@section{Introduction}
+@para{This is the documentation of the PdpUnit/Scribble library,
+      which was designed to facilitate automated testing for
+      CS 5010. The key features of the library are:}
+
+@itemlist[@item{Notation similar to Rackunit}
+           @item{Support for points and partial points}
+           @item{Generation of test report PDF}
+           @item{Supports testing for different possible solutions}
+           @item{Supports testing for termination/non-termination}
+           @item{Supports testing stateful programs}]
+
+@section{On automated submission testing}
+@para{Testing student submissions is a task that is very different from testing
+      your own program. When you test your own program, the most important thing
+      is that at least one test fails when there is an error. While it would be
+      nice have other tests succeed if they test parts that actually are ok, this
+      is not strictly neccessary - if you made a small error and suddenly all
+      your tests fail, you go and fix that error and your tests succeed again.}
+
+@para{You typically don't go off and fix a student's code if their tests fail
+      (and you also should not, because if you fix student A's code, what about
+      that error in student B's code and then what about student C and so on...).
+      But in contrast to your own code you know very little about whatever your
+      students will submit - all you know is what is written in the problem
+      statement. The problem statement should be precise enough to narrow down
+      the number of possible interpretations, but there still may be more than
+      one. When the students implement their solutions, each of them chooses
+      one interpretation, and they only have to test their program according
+      to that interpretation - but you have to accept all possible solutions.}
+
+@para{In summary, you have to keep two main things in mind:}
+@itemlist[@item{There are possibly more than one admissible interpretations of the
+                problem statement}
+           @item{Small errors should not cause overly huge point deductions. You
+                 should make the tests as independent from each other as possible}]
+@para{The second point can be hard. You have to design your tests very carefully.
+      It might also be useful to add some deliverables in the problem statement.
+      The most useful deliverable would be a way to construct arbitrary instances
+      of the central datastructures you need for testing. E.g. instead of just
+      having (initial-world speed), (world-after-key k) and (world-after-tick w),
+      you should also have (make-world speed list-of-balls) and 
+      (make-ball x y dir). That way your test for world-after-tick does not
+      depend on world-after-key working correctly. However, this may impose
+      certain design choices on the students, therefore you should use these 
+      requirements with care.}
+
+@section{Concepts}
+@para{PdpUnit is designed to test a single submission for a single problem
+      set. The basic idea is that the library and the test script are copied
+      into every submission folder and executed there, generating a PDF that
+      contains the test result for the respective submission.}
+
+@subsection{Structure}
+@para{PdpUnit uses test suites similar to Rackunit. Within a test suite,
+      there are several levels:}
+@itemlist[@item{Every test suite consists of a number of file-tests, i.e. a collection
+                of tests for a single file}
+           @item{Every file-test consists of a number of test groups. Test groups
+                 can be test groups with or without points.}
+           @item{Every test-group contains a number of tests. These tests may be
+                 simple tests or AND- or OR-tests. If the test group is a test group
+                 without points, the tests within the test group become top-level
+                 tests - the sum of their possible points becomes the possible points
+                 of the test group. If the test group is a test group with points,
+                 the points in the sub-tests become partial points.}
+           @item{Every OR-test may only contain simple tests and AND-tests}
+           @item{Every AND-test may only contain simple tests}]
+@para{This means that there is no arbitrary nesting. Test-groups implicitly behave
+      live AND-tests. Therefore, you can express any combination of tests using
+      either conjunctive or disjunctive normal form.}
+
+@subsection{Scoring and other aggregate values}
+@para{The achieved score on a test suite is calculated along the levels of the
+      previous section. There are five values to watch out for:}
+@itemlist[@item{The number of successes}
+           @item{The number of wrong outputs}
+           @item{The number of errors (an unexpected exception was encountered)}
+           @item{The achieved points}
+           @item{The possible points}]
+@para{In general, at any level those values are computed as the sum of the
+      values computed for the next lower level, down to the individual tests,
+      where the computation is rather simple - every test must have an assigned
+      number of possible points. They add one to the number of the number of
+      successes, wrong outputs or errors (depending of course on what actually
+      happened). If the test was a success, then the achieved points are the
+      possible points, else 0.}
+
+@para{There are some exceptions to the rule of summing up the values from the
+      next lower level:}
+@itemlist[@item{An OR-test propagates one success if any of it's sub-tests was
+                a success, or else one wrong output if at least one of it's sub-tests
+                got a wrong output, or else (if there were only errors), on error.}
+           @item{OR-tests do not support partial points (see below). OR-tests do
+                 not propagate the sum of possible points below, but only their own
+                 possible points - which are of course only achieved if the OR-test
+                 is a success.}
+           @item{The achieved points of AND-tests and test-groups are the possible
+                 points of that AND-test or test-group iff all tests that it contains
+                 are successful. Else, the achieved points are the minimum of the
+                 possible points and the sum of achieved points in the sub-tests. 
+                 This allows partial points to be awarded.}]
+
+@para{Partial points may lead to some confusion, so here is another short
+      explanation. Tests that are directly contained in a file-test are
+      called "top-level" tests. Every level below the file level must be assigned
+      a point value of 0 or greater. Every top-level test should have a point
+      value of greater than 0 (else, what is the point of the test?). Below,
+      points become "partial" points. Partial points are only printed in the
+      report if they are greater than zero. They are only counted if they are
+      contained in a test-group or AND-test and that test (group) does not fully
+      succeed. IMPORTANT: altough sub-tests of an OR-tests can be assigned non-zero
+      partial points, you should not do that. They are ignored by PdpUnits
+      calculations, but will be printed and thus create confusion.}
+
+@para{The sum of partial points does not need to match the possible points for
+      the test group or AND-test that contains them. Instead, you can make the
+      sum larger to have a test like "two out of these three things have to
+      succeed", or you can make the sum smaller to basically award bonus points
+      for all tests succeeding. You can also weigh the tests individually, and
+      give 0 partial points for basic cases.}
+
+
+@section{Using PdpUnit}
+@defmodule["pdpunit-scribble.rkt"]
+@subsection{Test Suites}
+@defform[(define-pdp-test-suite 
+           [name identifier?] 
+           [problem-set string?] 
+           [preamble string?] 
+           file-test ...)]{Defines a new test suite with the given name, for the
+                           given problem set. The @racket[problem-set] and
+                           @racket[preamble] arguments are used directly for
+                           printing (the preamble is a comment at the start
+                           of the test report).
+                           @racket[file-test ...] is a list of file-tests generated
+                           by @racket[test-file].
+                          }
+                          
+@defproc[(run-pdp-tests 
+          [test-suite pdp-test-suite?] 
+          [student-name string? "unknown"] 
+          [out-name string? (string-append "test-results-" student-name)]) 
+         boolean?]{Runs the given test suite and produces a pdf called
+                   @racket[out-name].pdf, with @racket[student-name] in the
+                   author position.}
+                        
+@subsection{File-Tests}  
+
+@margin-note{Note that the definitions are wrapped around every expression, regardless
+             of whether they are used in a particular test case or not. This means
+             that you should avoid having complicated definitions that use the students'
+             code on a global level, because if that code contains an error, all test
+             cases in the file/group that use the definitions will fail.}
+
+@defform/subs[(test-file
+           [filename string?] 
+           [preamble string?] 
+           definitions
+           test-group ...)
+           [(definitions 
+              ((identifier? 
+                expression?) ...))]]{Defines a new file-test. @racket[filename]
+                     and @racket[preamble] are only used for printing in the PDF.
+                     The list of definitions is put into a letrec and wrapped
+                     around each expression that is to be evaluated for testing.}
+                                    
+@subsection{Test-Groups}
+
+@defform/subs[(test-group
+               [title string?]
+               [preamble string?]
+               definitions
+               [test (or simple-test? test-connective?)] ...)
+              [(definitions 
+              ((identifier? 
+                expression?) ...))]]{Defines a new test group without points.
+                                     This means that the tests it contains are
+                                     still counted as top-level tests. @racket[title]
+                                     and @racket[preamble] are only used for printing
+                                     in the PDF, @racket[definitions] works just like
+                                     the definitions in @racket[test-file].
+                                     The definitions of the test group are added to
+                                     the definitions of the file-test.}
+                                    
+@defform/subs[(test-group-with-points
+               [title string?]
+               [preamble string?]
+               [points nonnegative-number?]
+               definitions
+               [test (or simple-test? test-connective?)] ...)
+              [(definitions 
+              ((identifier? 
+                expression?) ...))]]{Defines a new test group with @racket[points]. Tests 
+                                     within this test group are not handled as top-level tests,
+                                     their points will only be partial points. @racket[title]
+                                     and @racket[preamble] are only used for printing
+                                     in the PDF, @racket[definitions] works just like
+                                     the definitions in @racket[test-file].
+                                     The definitions of the test group are added to
+                                     the definitions of the file-test.}                                    
+
+@subsection{Test-Connectives}
+@defform[(test-and
+               [points nonnegative-number?]
+               [explanation string?]
+               [test simple-test?] ...)]{Defines a new AND-test. If every of its sub-tests is
+                                         successful, the achieved points are equal to the
+                                         possible @racket[points]. Else the achieved points
+                                         are the minimum of the possible @racket[points] and
+                                         sum of the partial points achieved in the sub-tests.
+                                         @racket[explanation] is only used for printing in the PDF.} 
+                                                                                                    
+@defform[(test-or
+               [points nonnegative-number?]
+               [explanation string?]
+               [test (or? and-test? 
+                          simple-test?)]
+               ...)]{Defines a new OR-test. If any of its sub-tests is
+                                         successful, the achieved points are equal to the
+                                         possible @racket[points]. Else the achieved points
+                                         are 0.
+                                         @racket[explanation] is only used for printing in the PDF.} 
+
+@subsection{Simple Tests}
+@subsubsection{Functional Tests}
+@defform[(test-equal? 
+          [expr1 any?]
+          [expr2 any?] 
+          [points nonnegative-number?]
+          [explanation string?])]{Tests whether the result of @racket[expr1] is @racket[equal?] to
+                                  the result of @racket[expr2]. The result of @racket[expr2] is also
+                                  referred to as the "expected" value.}
+                                 
+@defform[(test-within 
+          [expr1 any?]
+          [expr2 any?] 
+          [plusminus number?]
+          [points nonnegative-number?]
+          [explanation string?])]{Tests whether the result of @racket[expr1] is within +/- @racket[plusminus]
+                                  of the result of @racket[expr2]. The result of @racket[expr2] is also
+                                  referred to as the "expected" value. Both expressions should of course
+                                  return numbers.}
+
+@defform[(test-error 
+          [expr any?]
+          [pred (any? . -> . boolean?)] 
+          [points nonnegative-number?]
+          [explanation string?])]{Tests whether evaluating @racket[expr] causes an error that matches
+                                  @racket[pred]. Pred is used like the predicate in a @racket[with-handlers]
+                                  clause.}
+                                 
+@defform[(test-pred 
+          [expr any?]
+          [pred (any? . -> . boolean?)]
+          [points nonnegative-number?]
+          [explanation string?])]{Tests whether the result of @racket[expr] matches @racket[pred]. Basically,
+                                  this is similar to 
+                                  @racketblock|{(test-equal? (pred expr) true points explanation)}| The
+                                  difference is the presentation in case of a wrong value: wheres @racket[test-equal?]
+                                  will only say that @racket[false] was returned, @racket[test-pred] will instead
+                                  show the value for which @racket[pred] evaluated to @racket[false].}
+                                 
+@defform[(test-nontermination 
+          [expr any?]
+          [waittime nonnegative-number?]
+          [points nonnegative-number?]
+          [explanation string?])]{Tests whether the evaluation of @racket[expr] does not terminate within
+                                  @racket[waittime].}
+
+@subsubsection{State Tests}
+@para{As noted above, the global definitions of file-tests and test groups are wrapped around each expression in a @racket[letrec].
+This is bad for testing state, since everything is freshly constructed. This does not work for state, so there is a special
+test-form for state. You can still use the definitions from the enclosing file-tests and test groups, but they should not
+rely on your statefulness.}
+
+@defform/subs[(test-state 
+          [points nonnegative-number?]
+          [explanation string?]
+          definitions
+          state-subtest ...)
+          ([definitions ((identifier? expression?) ...)]
+           [state-subtest 
+            ([action expression?]
+             [test (-> boolean?)]
+             [pnts number?]
+             [exp string?])])]{@para{The definitions work similar to the definitions for file-tests and test groups, the only difference
+                               is that they are only evaluated once and then given to all expressions that are evaluated within
+                               the test. This means that a @racket[set!] to a variable that is defined here still does not work, 
+                               but @racket[set!]s in the code you test should work.}
+                                @para{A single test in state-test is actually a pair of an @racket[action] and a @racket[test] - the 
+                                      @racket[action] can be any expression, it's result is ignored, whereas the @racket[test] should 
+                                      be an expression that returns @racket[true] or @racket[false]. Each such test can have an 
+                                      explanation @racket[exp] and partial points @racket[pnts].}}
+
+@section{Final considerations}
+@subsection{Termination/Non-Termination}
+By default, there is a cap for each expression that is evaluated: if evaluating an expression
+does not terminate within 2 seconds, the evaluation is aborted and the test counts as erroneus.
+You can change that value in Line 14 in pdpunit-scribble.rkt. If you set the value to 0, no
+termination safeguards are included - expression may not terminate, and the test suite
+execution will not terminate as well. 

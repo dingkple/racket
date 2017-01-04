@@ -1,0 +1,82 @@
+Date		Who		Start		Stop		interruptions		Questions		TimeOnTask		comment		
+9/8			ZkD		16:53		16:59		0					11				6				 Need to look up the definition about 'contract'
+============commiting to git: 9/8 16:59 ===================
+9/9			ZkD		22:03		22:10		0					12				7				 It's easy, totally can be predicted.
+9/9			ZkD		22:10		22:16		0					13				6				 Easy, but wondering how to set a rule about the type of the arguement
+9/9			ZkD		22:16		22:20		0					14				4				 It's easy, but I'm not sure if it needs to write the contrct and something else about the functions
+============commiting to git: 9/9 22:21 ===================
+9/10		ZkD		10:41		10:49		0					15				8				 Easy.
++9/10		ZkD		10:50		11:01		0					16				11				 Intersting~ quite easy, just input the functions
++9/10		ZkD		11:01		11:04		0					17				3				 easy~		
++9/10		ZkD		11:04		11:27		0					18				23				 Find the func, but showed not difined. it's number->string not number-string...took me a long time to find this problem, thought I should require some more files to get this function!!!
++9/10		ZkD		11:27		11:34		0					19				7				 Easy.		
++9/10		ZkD		11:34		12:03		0					20				29				 Funny problem~ not hard, need time to adjust the points
++9/10		ZkD		12:03		12:47		0					21				44				 quite-hard.
+9/10		ZkD		1:15		2:48		0					22				93				 Longest racket program ever written
+9/10		ZkD		2:48		2:50		0					23				10				 easy.
+9/10		ZkD		2:50		3:05		0					24				10				 easy.
+9/10		ZkD		3:05		4:25		30					25				50				 reading things from the website and make some mistakes first about the cond using.
+9/10		ZkD		4:25		4:40		0					26				15				 easy.
+9/10		ZkD		4:40		4:57		0					27				17				 fairly easy
+9/10		ZkD		4:57		5:30		0					28				33				 haven't found a way to deal with the newline...
++============have a class to take, forgot to commit===================
+9/10		ZkD		5:45		5:55		0					21				17				 found a mistake about Ex21 and Ex22, fixed
++============class begin, again forgot to commit======================
+9/10		ZkD		23:23		23:33		0					29				10				 done, most time spent on require and provide...
+9/10		ZkD		23:33		23:47		0					30				14				 Similar to the funcs done before
+9/10		ZkD		23:47		23:56		0					31				8				 easy.
+9/10		ZkD		23:56		0:03		0					32				7				 easy.		
+============commiting to git: 9/11 0:03 ===================
+9/11		ZkD		8:46		9:04		0					100				18				 Managing the names of the file, some are mistaken
+============commiting to git: 9/11 9:05 ===================
+9/11		ZkD		16:38		16:42		0					11				4				 make some fixes, like data types
+9/11		ZkD		16:42		16:52		0					12				10				 review, and fix some probs in my tools.	
+============commiting to git: 9/11 19:21 ===================
+9/12		ZkD		15:44		15:55		0					24				11				 mistake in the ori func, did not handle the empty input list, fixed by adding a helpler
+============commiting to git: 9/12 15:57 ===================
+Total Time On Task Q11 (minutes)		10
+Total Time On Task Q12 (minutes)		17
+Total Time On Task Q13 (minutes)		6
+Total Time On Task Q14 (minutes)		4
+Total Time On Task Q15 (minutes)		8
+Total Time On Task Q16 (minutes)		11
+Total Time On Task Q17 (minutes)		3
+Total Time On Task Q18 (minutes)		23
+Total Time On Task Q19 (minutes)		7
+Total Time On Task Q20 (minutes)		29
+Total Time On Task Q21 (minutes)		61
+Total Time On Task Q22 (minutes)		93
+Total Time On Task Q23 (minutes)		10
+Total Time On Task Q24 (minutes)		21
+Total Time On Task Q25 (minutes)		50
+Total Time On Task Q26 (minutes)		15
+Total Time On Task Q27 (minutes)		17
+Total Time On Task Q28 (minutes)		33
+Total Time On Task Q29 (minutes)		10
+Total Time On Task Q30 (minutes)		14
+Total Time On Task Q31 (minutes)		8
+Total Time On Task Q32 (minutes)		7
+Total Time On Task Q100 (minutes)		18
+TOTQ11 (hours and tenths)				0.166
+TOTQ12 (hours and tenths)				0.283
+TOTQ13 (hours and tenths)				0.1
+TOTQ14 (hours and tenths)				0.066
+TOTQ15 (hours and tenths)				0.133
+TOTQ16 (hours and tenths)				0.183
+TOTQ17 (hours and tenths)				0.05
+TOTQ18 (hours and tenths)				0.383
+TOTQ19 (hours and tenths)				0.116
+TOTQ20 (hours and tenths)				0.483
+TOTQ21 (hours and tenths)				1.016
+TOTQ22 (hours and tenths)				1.55
+TOTQ23 (hours and tenths)				0.166
+TOTQ24 (hours and tenths)				0.35
+TOTQ25 (hours and tenths)				0.833
+TOTQ26 (hours and tenths)				0.25
+TOTQ27 (hours and tenths)				0.283
+TOTQ28 (hours and tenths)				0.55
+TOTQ29 (hours and tenths)				0.166
+TOTQ30 (hours and tenths)				0.233
+TOTQ31 (hours and tenths)				0.133
+TOTQ32 (hours and tenths)				0.116
+TOTQ100 (hours and tenths)				0.3
